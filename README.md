@@ -10,7 +10,7 @@ A modern, full-featured TODO application built with React, Fastify, and PostgreS
 ## 🚀 Quick Deploy
 
 ### One-Click Deploy to Render
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/YOUR_USERNAME/YOUR_REPO)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/grytrn/advanced-todo-app)
 
 The app includes a `render.yaml` blueprint for one-click deployment with PostgreSQL and Redis. [See deployment guide](./docs/RENDER_DEPLOYMENT.md)
 
