@@ -1,0 +1,110 @@
+# Technology Stack Decisions
+
+[2025-01-15] Runtime: Node.js 20 LTS (@arch-01)
+  Rationale: Native TypeScript support, stable, great ecosystem
+
+[2025-01-15] Backend Framework: Fastify 4.x (@arch-01)
+  Rationale: 2x faster than Express, built-in validation, TypeScript-first
+
+[2025-01-15] Frontend Framework: React 18 + Vite (@arch-01)
+  Rationale: Fast builds, great DX, mature ecosystem
+  Note: Consider Next.js for SSR in v2
+
+[2025-01-15] Database: PostgreSQL 16 (@arch-01)
+  Rationale: ACID compliance for e-commerce, JSON support, proven scale
+
+[2025-01-15] ORM: Prisma 5.x (@arch-01)
+  Rationale: Type-safe queries, great migrations, excellent DX
+
+[2025-01-15] State Management: Zustand (@frontend-01)
+  Rationale: Simple, TypeScript-first, 2KB size, no boilerplate
+
+[2025-01-15] Styling: Tailwind CSS 3.4 + CSS Modules (@frontend-01)
+  Rationale: Utility-first for speed, modules for complex components
+
+[2025-01-15] Authentication: JWT with refresh tokens (@arch-01)
+  Rationale: Stateless, scalable, standard
+  Details: 15min access + 7d refresh, RS256 algorithm
+
+[2025-01-15] Testing: Vitest + Playwright (@test-01)
+  Rationale: Vitest for speed, Playwright for reliability
+
+[2025-01-15] API Style: RESTful with OpenAPI (@arch-01)
+  Rationale: Standard, tooling support, easy to document
+  Future: Consider GraphQL for mobile app
+
+[2025-01-15] Caching: Redis 7.x (@backend-01)
+  Rationale: Session storage, rate limiting, caching layer
+
+[2025-01-15] File Storage: AWS S3 (@devops-01)
+  Rationale: Scalable, CDN integration, cost-effective
+
+[2025-01-15] Payment: Stripe (@arch-01)
+  Rationale: Industry standard, great docs, handles compliance
+
+[2025-01-15] Email: SendGrid (@backend-01)
+  Rationale: Reliable delivery, good analytics, easy integration
+
+[2025-01-15] Monitoring: Sentry + Prometheus (@devops-01)
+  Rationale: Error tracking + metrics, open source option
+
+[2025-01-15] CI/CD: GitHub Actions (@devops-01)
+  Rationale: Native to GitHub, free for public repos, good ecosystem
+
+# TODO App Specific Decisions
+
+[2025-06-17] Rich Text Editor: Tiptap 2.x (@arch-todo)
+  Rationale: Headless, extensible, great UX, markdown support
+  Features: Bold, italic, lists, headings, code blocks
+
+[2025-06-17] Real-time Sync: Socket.io (@arch-todo)
+  Rationale: WebSocket abstraction, automatic reconnection, rooms support
+  Use case: Cross-device sync, collaborative editing
+
+[2025-06-17] Drag & Drop: @dnd-kit (@arch-todo)
+  Rationale: Accessible, performant, touch support, sortable lists
+  
+[2025-06-17] Date/Time: date-fns 3.x (@arch-todo)
+  Rationale: Tree-shakeable, immutable, timezone support via date-fns-tz
+
+[2025-06-17] PDF Export: jsPDF + html2canvas (@arch-todo)
+  Rationale: Client-side generation, customizable, no server load
+  
+[2025-06-17] CSV Export: csv-stringify (@arch-todo)
+  Rationale: Lightweight, streaming support, RFC 4180 compliant
+
+[2025-06-17] Icons: Lucide React (@arch-todo)
+  Rationale: Tree-shakeable, consistent design, 1000+ icons
+
+[2025-06-17] Toast Notifications: Sonner (@arch-todo)
+  Rationale: Accessible, promise-based, beautiful design
+
+[2025-06-17] Form Validation: Zod + React Hook Form (@arch-todo)
+  Rationale: Type-safe schemas, great DX, performant
+
+[2025-06-17] UI Components: Radix UI + Tailwind (@arch-todo)
+  Rationale: Headless components, accessible, composable
+  Components: Dialog, Dropdown, Switch, Checkbox
+
+[2025-06-17] Theme: CSS Variables + Tailwind (@arch-todo)
+  Rationale: Native CSS, easy theming, no JS overhead
+  Themes: Light, Dark, System preference
+
+[2025-06-17] Search: PostgreSQL Full Text Search (@arch-todo)
+  Rationale: No additional infrastructure, good enough for TODOs
+  Features: Weighted search, highlighting, fuzzy matching
+
+[2025-06-17] Background Jobs: BullMQ (@arch-todo)
+  Rationale: Redis-based, reliable, good for reminders
+  Use case: Email reminders, recurring tasks
+
+[2025-06-17] Email Templates: React Email (@arch-todo)
+  Rationale: React components for emails, great DX, responsive
+
+[2025-06-17] Deployment Stack (@arch-todo):
+  - Frontend: Vercel (free tier, great DX)
+  - Backend: Render.com (free tier with PostgreSQL)
+  - Redis: Upstash (free tier, serverless)
+  - File Storage: Cloudinary (free tier for images)
+  - Monitoring: Sentry (free tier)
+  - Analytics: Plausible (privacy-focused)

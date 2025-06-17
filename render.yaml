@@ -1,0 +1,175 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: todo-app-db
+    runtime: docker
+    plan: free
+    dockerfilePath: ./docker/postgres/Dockerfile
+    dockerContext: ./docker/postgres
+    envVars:
+      - key: POSTGRES_USER
+        value: todouser
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+      - key: POSTGRES_DB
+        value: tododb
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
+
+  # Redis for sessions and real-time
+  - type: pserv
+    name: todo-app-redis
+    runtime: docker
+    plan: free
+    dockerfilePath: ./docker/redis/Dockerfile
+    dockerContext: ./docker/redis
+    envVars:
+      - key: REDIS_PASSWORD
+        generateValue: true
+    disk:
+      name: redis-data
+      mountPath: /data
+      sizeGB: 1
+
+  # Backend API Service
+  - type: web
+    name: todo-app-backend
+    runtime: node
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm run start:prod
+    envVars:
+      # Database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: todo-app-db
+          property: connectionString
+      
+      # Redis
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: todo-app-redis
+          property: hostport
+      
+      # JWT Secrets
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      
+      # Application
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8000
+      - key: FRONTEND_URL
+        value: https://your-frontend.vercel.app
+      
+      # Email (user needs to configure)
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        value: noreply@yourdomain.com
+      
+      # OAuth (user needs to configure)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      
+      # Security
+      - key: CSRF_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      
+      # Optional: Sentry
+      - key: SENTRY_DSN
+        sync: false
+      
+      # Optional: S3 for file uploads
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_BUCKET
+        sync: false
+      - key: AWS_REGION
+        value: us-east-1
+
+    healthCheckPath: /api/v1/health
+    
+    # Auto-deploy on push to main
+    autoDeploy: true
+    
+    # Build filters
+    buildFilter:
+      paths:
+        - backend/**
+        - shared/**
+        - package.json
+
+# Static Site for Frontend (Alternative to Vercel)
+# Uncomment if you want to host frontend on Render too
+# - type: web
+#   name: todo-app-frontend
+#   runtime: static
+#   buildCommand: cd frontend && npm install && npm run build
+#   staticPublishPath: ./frontend/dist
+#   envVars:
+#     - key: VITE_API_URL
+#       value: https://todo-app-backend.onrender.com
+#     - key: VITE_SENTRY_DSN
+#       sync: false
+#   headers:
+#     - path: /*
+#       name: X-Frame-Options
+#       value: DENY
+#     - path: /*
+#       name: X-Content-Type-Options
+#       value: nosniff
+#     - path: /*
+#       name: X-XSS-Protection
+#       value: 1; mode=block
+#   routes:
+#     - type: rewrite
+#       source: /*
+#       destination: /index.html
+
+databases:
+  - name: todo-app-db
+    plan: free
+    databaseName: tododb
+    user: todouser
+
+envVarGroups:
+  - name: todo-app-secrets
+    envVars:
+      # Add your secrets here after deployment
+      - key: SMTP_USER
+        value: your-email@gmail.com
+      - key: SMTP_PASS
+        value: your-app-password
+      - key: GOOGLE_CLIENT_ID
+        value: your-google-client-id
+      - key: GOOGLE_CLIENT_SECRET
+        value: your-google-client-secret
+      - key: GITHUB_CLIENT_ID
+        value: your-github-client-id
+      - key: GITHUB_CLIENT_SECRET
+        value: your-github-client-secret
+      - key: SENTRY_DSN
+        value: your-sentry-dsn

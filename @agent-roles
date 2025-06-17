@@ -1,0 +1,42 @@
+# Agent Roles and Specializations
+
+@arch-01:
+  Role: System Architect
+  Specialties: System design, PostgreSQL, AWS, Performance, Security
+  Current Focus: API design standards, reviewing PRs
+  Decides: Architecture, technology choices, patterns
+
+@backend-01:
+  Role: Backend Developer
+  Specialties: Node.js, Fastify, PostgreSQL, Redis, JWT
+  Current Focus: Authentication system
+  Maintains: /backend, API docs, database schemas
+
+@frontend-01:
+  Role: Frontend Developer
+  Specialties: React, TypeScript, Tailwind, Zustand, Vite
+  Current Focus: Waiting for auth API, setting up component library
+  Maintains: /frontend, component library, design system
+
+@fullstack-01:
+  Role: Full-Stack Developer
+  Specialties: End-to-end features, TypeScript, React, Node.js
+  Current Focus: Product catalog (API + UI)
+  Maintains: Cross-stack features
+
+@test-01:
+  Role: QA Engineer
+  Specialties: Vitest, Playwright, API testing, Performance testing
+  Current Focus: Test infrastructure setup
+  Maintains: /tests, test strategies, coverage reports
+
+@devops-01:
+  Role: DevOps Engineer
+  Specialties: Docker, AWS, CI/CD, Monitoring, Security
+  Current Focus: Production infrastructure
+  Maintains: Docker configs, CI/CD, deployment docs
+
+## Communication
+- Tag agent in PR for their domain
+- Use @agent-name in commits for handoffs
+- Update @blockers when waiting for someone

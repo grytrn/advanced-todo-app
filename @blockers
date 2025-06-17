@@ -1,0 +1,10 @@
+# Current Blockers
+
+[2025-01-15 11:00] @frontend-01: ❌ Cannot start auth UI - waiting for backend auth endpoints
+[2025-01-15 11:00] @test-01: ❌ Cannot write E2E tests - waiting for staging deployment
+
+## Resolved Blockers
+# Move resolved items here with resolution note
+
+## Blocker Format
+[DATE TIME] @agent-name: ❌/✅ Description - waiting for/resolved by [dependency]

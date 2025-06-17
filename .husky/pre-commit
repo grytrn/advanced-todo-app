@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-commit checks..."
+
+# Run lint-staged
+npx lint-staged
+
+# Check for forbidden patterns
+echo "🔍 Checking for console.log statements..."
+if grep -r "console\.log" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" ./backend/src ./frontend/src 2>/dev/null; then
+  echo "❌ Error: console.log found in source files. Use proper logging instead."
+  exit 1
+fi
+
+echo "🔍 Checking for 'any' types..."
+if grep -r ": any" --include="*.ts" --include="*.tsx" ./backend/src ./frontend/src ./shared 2>/dev/null; then
+  echo "❌ Error: 'any' type found in TypeScript files. Use proper types."
+  exit 1
+fi
+
+echo "🔍 Checking for hardcoded secrets..."
+if grep -rE "(password|secret|api_key|apikey|token)\s*=\s*[\"'][^\"']+[\"']" \
+  --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+  ./backend/src ./frontend/src 2>/dev/null | \
+  grep -v ".example" | \
+  grep -v "test" | \
+  grep -v "spec"; then
+  echo "❌ Error: Possible hardcoded secrets found. Use environment variables."
+  exit 1
+fi
+
+echo "🔍 Checking for TODO comments..."
+if grep -r "TODO" --include="*.ts" --include="*.tsx" ./backend/src ./frontend/src 2>/dev/null; then
+  echo "⚠️  Warning: TODO comments found. Consider creating issues instead."
+  # Don't fail on TODOs, just warn
+fi
+
+echo "✅ All pre-commit checks passed!"

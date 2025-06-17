@@ -1,0 +1,76 @@
+#!/bin/bash
+# Post-commit hook for automatic @current-work updates
+# Copy this to .git/hooks/post-commit and make executable
+
+# Get current branch and last commit info
+BRANCH=$(git branch --show-current)
+COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_HASH=$(git log -1 --pretty=%H)
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+
+# Try to determine agent from git config or commit message
+AGENT=$(git config user.name)
+if [[ ! "$AGENT" =~ ^@.*-[0-9]+$ ]]; then
+    # Try to extract from commit message
+    if [[ "$COMMIT_MSG" =~ @([a-z]+-[0-9]+) ]]; then
+        AGENT="@${BASH_REMATCH[1]}"
+    else
+        # Skip if we can't determine agent
+        exit 0
+    fi
+fi
+
+# Determine status from commit message
+STATUS="⏳"
+if [[ "$COMMIT_MSG" =~ \[COMPLETE\]|\[DONE\]|✅ ]]; then
+    STATUS="✅"
+elif [[ "$COMMIT_MSG" =~ \[BLOCKED\]|❌ ]]; then
+    STATUS="❌"
+elif [[ "$COMMIT_MSG" =~ \[WIP\]|⏳ ]]; then
+    STATUS="⏳"
+fi
+
+# Extract task description (first line of commit, removing status indicators)
+TASK=$(echo "$COMMIT_MSG" | head -1 | sed -E 's/\[(COMPLETE|DONE|BLOCKED|WIP)\]//g' | sed 's/[✅❌⏳]//g' | xargs)
+
+# Update @current-work
+CURRENT_WORK_FILE="@current-work"
+if [ -f "$CURRENT_WORK_FILE" ]; then
+    echo "[$TIMESTAMP] $AGENT: $STATUS $TASK | $BRANCH" >> "$CURRENT_WORK_FILE"
+fi
+
+# Handle handoffs
+if [[ "$COMMIT_MSG" =~ Handoff:[[:space:]]*(@[a-z]+-[0-9]+) ]]; then
+    NEXT_AGENT="${BASH_REMATCH[1]}"
+    
+    # Create handoff record
+    HANDOFF_FILE="@handoffs-$(date +%Y-%m-%d).log"
+    echo "[$TIMESTAMP] $AGENT → $NEXT_AGENT: $TASK" >> "$HANDOFF_FILE"
+    
+    # Update next agent's status
+    echo "[$TIMESTAMP] $NEXT_AGENT: ⏳ Received handoff: $TASK" >> "$CURRENT_WORK_FILE"
+    
+    # Clear related blockers if mentioned
+    if [[ "$COMMIT_MSG" =~ [Uu]nblock|[Rr]esolve ]]; then
+        # Add unblock notice to blockers file
+        echo "[$TIMESTAMP] $AGENT: ✅ Unblocked $NEXT_AGENT - $TASK complete" >> "@blockers"
+    fi
+fi
+
+# Update assignments.lock if files were modified
+MODIFIED_FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT_HASH")
+if [ -f "@assignments.lock" ] && [ -n "$MODIFIED_FILES" ]; then
+    # This would need a more sophisticated update mechanism
+    # For now, just log that files were modified
+    echo "# Files modified by $AGENT in commit $COMMIT_HASH" >> "@assignments-history.log"
+    echo "$MODIFIED_FILES" >> "@assignments-history.log"
+    echo "" >> "@assignments-history.log"
+fi
+
+# Performance tracking - log commit time if in feature branch
+if [[ "$BRANCH" =~ ^feature/ ]]; then
+    PERF_FILE="@performance-commits.log"
+    echo "[$TIMESTAMP] $AGENT: $BRANCH - $(git log -1 --pretty=%h)" >> "$PERF_FILE"
+fi
+
+echo "✅ Updated agent coordination files for $AGENT"

@@ -1,0 +1,363 @@
+# API Contracts
+
+## Base URL
+Development: http://localhost:8000/api/v1
+Staging: https://staging-api.example.com/api/v1
+Production: https://api.example.com/api/v1
+
+## Authentication Endpoints
+
+### POST /auth/register
+Request: { email: string, password: string, name: string }
+Response: { success: true, data: { user: User } }
+Status: ✅ Complete (@backend-todo)
+
+### POST /auth/login
+Request: { email: string, password: string }
+Response: { success: true, data: { accessToken: string, refreshToken: string, user: User } }
+Status: ✅ Complete (@backend-todo)
+
+### POST /auth/refresh
+Request: { refreshToken: string }
+Response: { success: true, data: { accessToken: string, refreshToken: string } }
+Status: ✅ Complete (@backend-todo)
+
+### POST /auth/logout
+Request: { refreshToken: string }
+Response: { success: true, data: { message: string } }
+Status: ✅ Complete (@backend-todo)
+
+### GET /auth/me
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { user: User } }
+Status: ✅ Complete (@backend-todo)
+
+## User Endpoints
+
+### GET /users/:id
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { user: User } }
+Status: 📋 Planned
+
+### PATCH /users/:id
+Headers: Authorization: Bearer <token>
+Request: { name?: string, email?: string }
+Response: { success: true, data: { user: User } }
+Status: 📋 Planned
+
+## Product Endpoints
+
+### GET /products
+Query: ?page=1&limit=20&sortBy=created_at&sortOrder=desc
+Response: { success: true, data: { items: Product[], ...pagination } }
+Status: ⏳ In development (@fullstack-01)
+
+### GET /products/:id
+Response: { success: true, data: { product: Product } }
+Status: 📋 Planned
+
+### POST /products (Admin only)
+Headers: Authorization: Bearer <token>
+Request: { name: string, description: string, price: number, ... }
+Response: { success: true, data: { product: Product } }
+Status: 📋 Planned
+
+## Type Definitions
+All types are defined in /shared/types/
+- User: shared/types/auth.ts
+- Product: shared/types/product.ts (pending)
+- ApiResponse: shared/types/api.ts
+- Todo: shared/types/todo.ts
+- Category: shared/types/category.ts
+- Export: shared/types/export.ts
+
+## Status Legend
+✅ Complete and tested
+⏳ In development
+📋 Planned
+❌ Blocked
+
+## TODO App Endpoints
+
+### POST /todos
+Headers: Authorization: Bearer <token>
+Request: { 
+  title: string, 
+  description?: string,
+  categoryId?: string,
+  tags?: string[],
+  dueDate?: string, // ISO 8601
+  reminder?: string, // ISO 8601
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
+  isRecurring?: boolean,
+  recurrence?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'CUSTOM'
+}
+Response: { success: true, data: { todo: Todo } }
+Status: ✅ Complete (@backend-todo)
+
+### GET /todos
+Headers: Authorization: Bearer <token>
+Query: ?page=1&limit=20&sortBy=createdAt&sortOrder=desc&categoryId=xxx&tag=xxx&search=xxx&status=PENDING|IN_PROGRESS|COMPLETED|CANCELLED|ARCHIVED|all&priority=LOW|MEDIUM|HIGH|URGENT&hasDueDate=true|false&isOverdue=true|false
+Response: { success: true, data: { items: Todo[], pagination: {...} } }
+Status: ✅ Complete (@backend-todo)
+
+### GET /todos/:id
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { todo: Todo } }
+Status: ✅ Complete (@backend-todo)
+
+### PATCH /todos/:id
+Headers: Authorization: Bearer <token>
+Request: {
+  title?: string,
+  description?: string,
+  categoryId?: string | null,
+  tags?: string[],
+  dueDate?: string | null,
+  reminder?: string | null,
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
+  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED',
+  position?: number,
+  isRecurring?: boolean,
+  recurrence?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'CUSTOM' | null
+}
+Response: { success: true, data: { todo: Todo } }
+Status: ✅ Complete (@backend-todo)
+
+### DELETE /todos/:id
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: null }
+Status: ✅ Complete (@backend-todo)
+
+### POST /todos/:id/complete
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { todo: Todo } }
+Status: ✅ Complete (@backend-todo)
+
+### POST /todos/:id/uncomplete
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { todo: Todo } }
+Status: ✅ Complete (@backend-todo)
+
+### POST /todos/reorder
+Headers: Authorization: Bearer <token>
+Request: { todoIds: string[] } // Array of todo IDs in new order
+Response: { success: true, data: { todos: Todo[] } }
+Status: ✅ Complete (@backend-todo)
+
+## Category Endpoints
+
+### POST /categories
+Headers: Authorization: Bearer <token>
+Request: { name: string, color?: string, icon?: string }
+Response: { success: true, data: { category: Category } }
+Status: ✅ Complete (@backend-todo)
+
+### GET /categories
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { categories: Category[] } }
+Status: ✅ Complete (@backend-todo)
+
+### GET /categories/:id
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { category: Category } }
+Status: ✅ Complete (@backend-todo)
+
+### PATCH /categories/:id
+Headers: Authorization: Bearer <token>
+Request: { name?: string, color?: string, icon?: string | null }
+Response: { success: true, data: { category: Category } }
+Status: ✅ Complete (@backend-todo)
+
+### DELETE /categories/:id
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: null }
+Status: ✅ Complete (@backend-todo)
+
+## Tag Endpoints
+
+### GET /tags
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { tags: string[] } } // Unique tags from user's todos
+Status: ✅ Complete (@backend-todo)
+
+### GET /tags/popular
+Headers: Authorization: Bearer <token>
+Query: ?limit=20
+Response: { success: true, data: { tags: Array<{name: string, count: number}> } }
+Status: ✅ Complete (@backend-todo)
+
+## Export Endpoints
+
+### POST /exports
+Headers: Authorization: Bearer <token>
+Request: {
+  format: 'PDF' | 'CSV' | 'JSON' | 'MARKDOWN' | 'ICAL',
+  options?: {
+    includeCompleted?: boolean,
+    includeArchived?: boolean,
+    includeTags?: boolean,
+    includeAttachments?: boolean,
+    includeComments?: boolean,
+    categoryIds?: string[],
+    tagNames?: string[],
+    priorities?: string[],
+    dateRange?: { from?: string, to?: string },
+    csv?: {
+      columns?: string[],
+      delimiter?: ',' | ';' | '\t',
+      includeHeaders?: boolean
+    },
+    pdf?: {
+      templateId?: string,
+      includeCharts?: boolean,
+      pageSize?: 'A4' | 'Letter' | 'Legal',
+      orientation?: 'portrait' | 'landscape',
+      branding?: { logo?: string, primaryColor?: string, fontFamily?: string }
+    },
+    markdown?: {
+      includeMetadata?: boolean,
+      groupBy?: 'category' | 'priority' | 'dueDate'
+    },
+    ical?: {
+      includeReminders?: boolean,
+      calendarName?: string
+    }
+  },
+  sendEmail?: boolean,
+  emailRecipients?: string[]
+}
+Response: { success: true, data: { jobId: string, status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'EXPIRED', estimatedTime?: number } }
+Status: ✅ Complete (@backend-export-todo)
+
+### GET /exports
+Headers: Authorization: Bearer <token>
+Query: ?page=1&limit=20&status=PENDING|PROCESSING|COMPLETED|FAILED|EXPIRED&format=PDF|CSV|JSON|MARKDOWN|ICAL
+Response: { success: true, data: { items: ExportJob[], pagination: {...} } }
+Status: ✅ Complete (@backend-export-todo)
+
+### GET /exports/:jobId
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { job: ExportJob } }
+Status: ✅ Complete (@backend-export-todo)
+
+### GET /exports/:jobId/download
+Headers: Authorization: Bearer <token>
+Response: File download (PDF/CSV/JSON/Markdown/iCal)
+Status: ✅ Complete (@backend-export-todo)
+
+### GET /exports/:jobId/progress (SSE)
+Headers: Authorization: Bearer <token>
+Response: Server-Sent Events stream with progress updates
+Status: ✅ Complete (@backend-export-todo)
+
+### POST /exports/schedules
+Headers: Authorization: Bearer <token>
+Request: {
+  name: string,
+  frequency: 'ONCE' | 'DAILY' | 'WEEKLY' | 'MONTHLY',
+  format: 'PDF' | 'CSV' | 'JSON' | 'MARKDOWN' | 'ICAL',
+  options: { ...same as export options... },
+  emailDelivery?: {
+    enabled: boolean,
+    recipients: string[],
+    subject?: string,
+    message?: string
+  }
+}
+Response: { success: true, data: { schedule: ExportSchedule } }
+Status: ✅ Complete (@backend-export-todo)
+
+### GET /exports/schedules
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { items: ExportSchedule[] } }
+Status: ✅ Complete (@backend-export-todo)
+
+### PATCH /exports/schedules/:scheduleId
+Headers: Authorization: Bearer <token>
+Request: {
+  name?: string,
+  frequency?: 'ONCE' | 'DAILY' | 'WEEKLY' | 'MONTHLY',
+  format?: 'PDF' | 'CSV' | 'JSON' | 'MARKDOWN' | 'ICAL',
+  options?: { ...same as export options... },
+  emailDelivery?: { ...same as above... },
+  isActive?: boolean
+}
+Response: { success: true, data: { schedule: ExportSchedule } }
+Status: ✅ Complete (@backend-export-todo)
+
+### DELETE /exports/schedules/:scheduleId
+Headers: Authorization: Bearer <token>
+Response: { success: true }
+Status: ✅ Complete (@backend-export-todo)
+
+### POST /exports/templates
+Headers: Authorization: Bearer <token>
+Request: {
+  name: string,
+  description?: string,
+  format: 'PDF' | 'CSV' | 'JSON' | 'MARKDOWN' | 'ICAL',
+  content: string, // Template content (HTML for PDF, etc.)
+  isPublic?: boolean
+}
+Response: { success: true, data: { template: ExportTemplate } }
+Status: ✅ Complete (@backend-export-todo)
+
+### GET /exports/templates
+Headers: Authorization: Bearer <token>
+Query: ?format=PDF|CSV|JSON|MARKDOWN|ICAL&includePublic=true&includePrivate=true
+Response: { success: true, data: { items: ExportTemplate[] } }
+Status: ✅ Complete (@backend-export-todo)
+
+### PATCH /exports/templates/:templateId
+Headers: Authorization: Bearer <token>
+Request: {
+  name?: string,
+  description?: string,
+  content?: string,
+  isPublic?: boolean
+}
+Response: { success: true, data: { template: ExportTemplate } }
+Status: ✅ Complete (@backend-export-todo)
+
+### DELETE /exports/templates/:templateId
+Headers: Authorization: Bearer <token>
+Response: { success: true }
+Status: ✅ Complete (@backend-export-todo)
+
+## Real-time Endpoints (WebSocket)
+
+### WS /ws
+Authentication: Pass token as query param ?token=xxx
+Events:
+- todo:created - When a todo is created
+- todo:updated - When a todo is updated
+- todo:deleted - When a todo is deleted
+- todo:reordered - When todos are reordered
+Status: 📋 Planned
+
+## User Preferences Endpoints
+
+### GET /users/preferences
+Headers: Authorization: Bearer <token>
+Response: { success: true, data: { preferences: UserPreferences } }
+Status: 📋 Planned
+
+### PATCH /users/preferences
+Headers: Authorization: Bearer <token>
+Request: {
+  theme?: 'light' | 'dark' | 'system',
+  emailReminders?: boolean,
+  pushNotifications?: boolean,
+  defaultTodoView?: 'list' | 'board' | 'calendar'
+}
+Response: { success: true, data: { preferences: UserPreferences } }
+Status: 📋 Planned
+
+## Notes
+- All endpoints return ApiResponse<T> format
+- All authenticated endpoints require Bearer token
+- Rate limiting: 100 requests per 15 minutes per IP
+- File uploads use multipart/form-data
+- WebSocket connections require token authentication
+- Rich text content is stored as HTML (sanitized on backend)

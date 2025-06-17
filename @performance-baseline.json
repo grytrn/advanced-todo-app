@@ -1,0 +1,98 @@
+{
+  "api_endpoints": {
+    "/api/v1/auth/register": {
+      "p50": 80,
+      "p95": 150,
+      "p99": 300,
+      "max_acceptable": 500
+    },
+    "/api/v1/auth/login": {
+      "p50": 45,
+      "p95": 120,
+      "p99": 200,
+      "max_acceptable": 400
+    },
+    "/api/v1/auth/refresh": {
+      "p50": 30,
+      "p95": 80,
+      "p99": 150,
+      "max_acceptable": 300
+    },
+    "/api/v1/products": {
+      "p50": 60,
+      "p95": 180,
+      "p99": 400,
+      "max_acceptable": 800
+    }
+  },
+  "build_times": {
+    "backend": {
+      "cold": 15000,
+      "incremental": 2000,
+      "max_acceptable": 30000
+    },
+    "frontend": {
+      "cold": 25000,
+      "incremental": 3000,
+      "max_acceptable": 45000
+    }
+  },
+  "test_duration": {
+    "unit": {
+      "backend": 20000,
+      "frontend": 15000,
+      "max_acceptable": 60000
+    },
+    "integration": {
+      "backend": 45000,
+      "frontend": 30000,
+      "max_acceptable": 120000
+    },
+    "e2e": {
+      "full_suite": 180000,
+      "smoke_tests": 30000,
+      "max_acceptable": 300000
+    }
+  },
+  "bundle_sizes": {
+    "frontend": {
+      "main_js": {
+        "size": 150000,
+        "gzipped": 50000,
+        "max_acceptable": 200000
+      },
+      "vendor_js": {
+        "size": 300000,
+        "gzipped": 100000,
+        "max_acceptable": 400000
+      },
+      "main_css": {
+        "size": 50000,
+        "gzipped": 15000,
+        "max_acceptable": 75000
+      }
+    }
+  },
+  "database_queries": {
+    "user_lookup": {
+      "p50": 5,
+      "p95": 15,
+      "p99": 30
+    },
+    "product_list": {
+      "p50": 20,
+      "p95": 50,
+      "p99": 100
+    }
+  },
+  "memory_usage": {
+    "backend": {
+      "startup": 100,
+      "idle": 150,
+      "under_load": 300,
+      "max_acceptable": 512
+    }
+  },
+  "last_updated": "2025-01-15T12:00:00Z",
+  "notes": "All times in milliseconds, sizes in bytes, memory in MB"
+}

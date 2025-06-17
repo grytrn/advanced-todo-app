@@ -1,0 +1,25 @@
+Project: Example Project Name
+Description: Example Project Description
+Stage: Development
+Current Sprint: Sprint 1 - Foundation
+Sprint Period: 2025-01-15 to 2025-01-29
+Target Launch: 2025-03-01
+
+Key Features:
+- Example Feature 1
+- Example Feature 2
+- Example Feature 3
+- Example Feature 4
+- Example Feature 5
+- Example Feature ...
+
+Tech Lead: @arch-01
+Project Manager: @human
+Stakeholders: @human, @product-team
+
+Repository: [git URL]
+Staging: https://staging.example.com (not deployed)
+Production: https://shop.example.com (not deployed)
+
+Current Focus: Example Feature 1, or other Focus
+Next Milestone: Example Feature 1 completed 

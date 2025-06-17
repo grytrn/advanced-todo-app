@@ -1,0 +1,104 @@
+{
+  "name": "multi-agent-template",
+  "version": "1.0.0",
+  "description": "Production-ready multi-agent development template with frontend/backend separation",
+  "private": true,
+  "scripts": {
+    "// Installation": "=========================================",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "prepare": "husky install",
+    
+    "// Development": "=========================================",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    
+    "// Testing": "=============================================",
+    "test": "npm run test:backend && npm run test:frontend && npm run test:e2e",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:e2e": "cd tests/e2e && npm test",
+    "test:integration": "cd tests/integration && npm test",
+    
+    "// Code Quality": "========================================",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:fix": "npm run lint:backend -- --fix && npm run lint:frontend -- --fix",
+    
+    "typecheck": "npm run typecheck:backend && npm run typecheck:frontend",
+    "typecheck:backend": "cd backend && npm run typecheck",
+    "typecheck:frontend": "cd frontend && npm run typecheck",
+    
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    
+    "// Building": "============================================",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    
+    "// Docker": "==============================================",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v --remove-orphans",
+    
+    "// Database": "============================================",
+    "db:migrate": "cd backend && npm run migrate",
+    "db:seed": "cd backend && npm run seed",
+    "db:reset": "cd backend && npm run db:reset",
+    
+    "// Validation": "==========================================",
+    "validate": "npm run lint && npm run typecheck && npm run test",
+    "validate:backend": "npm run lint:backend && npm run typecheck:backend && npm run test:backend",
+    "validate:frontend": "npm run lint:frontend && npm run typecheck:frontend && npm run test:frontend",
+    
+    "// Utilities": "===========================================",
+    "clean": "npm run clean:backend && npm run clean:frontend && rm -rf node_modules",
+    "clean:backend": "cd backend && rm -rf dist node_modules coverage",
+    "clean:frontend": "cd frontend && rm -rf dist node_modules coverage",
+    
+    "// Agent Tools": "==========================================",
+    "agent:metrics": "node scripts/agent-metrics.js",
+    "agent:update-context": "./scripts/update-context.sh",
+    "agent:context": "./scripts/update-context.sh",
+    "handoff": "./scripts/handoff.sh",
+    
+    "// Git Hooks": "===========================================",
+    "pre-commit": "lint-staged",
+    "commit-msg": "commitlint --edit",
+    
+    "// Agent Tools": "=========================================",
+    "agent:metrics": "node scripts/agent-metrics.js",
+    "agent:status": "tail -20 @current-work",
+    "agent:blockers": "grep -E '❌' @blockers || echo 'No blockers!'",
+    "agent:handoffs": "ls -la @handoffs-*.log 2>/dev/null || echo 'No handoffs recorded'",
+    "agent:setup-hooks": "cp scripts/git-hooks/* .git/hooks/ && chmod +x .git/hooks/*",
+    "agent:validate-locks": "node -e \"try{JSON.parse(require('fs').readFileSync('@assignments.lock'))}catch(e){console.error('Invalid @assignments.lock:',e.message);process.exit(1)}\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.0.0",
+    "@commitlint/config-conventional": "^18.0.0",
+    "concurrently": "^8.0.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

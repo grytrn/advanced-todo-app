@@ -1,0 +1,22 @@
+{
+  "name": "integration-tests",
+  "version": "1.0.0",
+  "description": "Cross-service integration tests for TODO app",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

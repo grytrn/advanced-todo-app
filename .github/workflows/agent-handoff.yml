@@ -1,0 +1,270 @@
+name: Agent Handoff Automation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  process-handoff:
+    runs-on: ubuntu-latest
+    name: Process Agent Handoff
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Process Handoff from Commit
+        if: github.event_name == 'push'
+        id: commit-handoff
+        run: |
+          # Get the latest commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_SHA=$(git log -1 --pretty=%H)
+          AUTHOR=$(git log -1 --pretty=%an)
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
+          
+          echo "Commit message: $COMMIT_MSG"
+          echo "Author: $AUTHOR"
+          
+          # Check for handoff pattern
+          if [[ "$COMMIT_MSG" =~ Handoff:[[:space:]]*(@[a-zA-Z]+-[0-9]+) ]]; then
+            NEXT_AGENT="${BASH_REMATCH[1]}"
+            echo "Handoff detected to: $NEXT_AGENT"
+            echo "handoff_detected=true" >> $GITHUB_OUTPUT
+            echo "next_agent=$NEXT_AGENT" >> $GITHUB_OUTPUT
+            echo "from_agent=$AUTHOR" >> $GITHUB_OUTPUT
+            echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+            
+            # Extract task description (first line of commit)
+            TASK=$(echo "$COMMIT_MSG" | head -1 | sed 's/Handoff:.*//' | xargs)
+            echo "task=$TASK" >> $GITHUB_OUTPUT
+            
+            # Update @current-work
+            echo "[$TIMESTAMP] $AUTHOR: ✅ Completed - $TASK" >> @current-work
+            echo "[$TIMESTAMP] $NEXT_AGENT: ⏳ Received handoff - $TASK" >> @current-work
+            
+            # Check for unblock mentions
+            if [[ "$COMMIT_MSG" =~ [Uu]nblock|[Rr]esolve ]]; then
+              echo "[$TIMESTAMP] $AUTHOR: ✅ Unblocked $NEXT_AGENT - $TASK" >> @blockers
+            fi
+            
+            # Update handoff log
+            echo "[$TIMESTAMP] $AUTHOR → $NEXT_AGENT: $TASK (commit: $COMMIT_SHA)" >> @handoffs.log
+          else
+            echo "No handoff detected"
+            echo "handoff_detected=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Process Handoff from PR
+        if: github.event_name == 'pull_request'
+        id: pr-handoff
+        run: |
+          # Extract from PR template if using agent_handoff.md template
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Look for "To Agent: @agent-name" pattern
+          if [[ "$PR_BODY" =~ To[[:space:]]Agent:[[:space:]]*(@[a-zA-Z]+-[0-9]+) ]]; then
+            NEXT_AGENT="${BASH_REMATCH[1]}"
+            echo "PR handoff detected to: $NEXT_AGENT"
+            echo "handoff_detected=true" >> $GITHUB_OUTPUT
+            echo "next_agent=$NEXT_AGENT" >> $GITHUB_OUTPUT
+            echo "from_agent=${{ github.event.pull_request.user.login }}" >> $GITHUB_OUTPUT
+            echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "handoff_detected=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create Handoff Issue
+        if: steps.commit-handoff.outputs.handoff_detected == 'true' || steps.pr-handoff.outputs.handoff_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isCommitHandoff = '${{ steps.commit-handoff.outputs.handoff_detected }}' === 'true';
+            const isPRHandoff = '${{ steps.pr-handoff.outputs.handoff_detected }}' === 'true';
+            
+            let nextAgent, fromAgent, task, reference;
+            
+            if (isCommitHandoff) {
+              nextAgent = '${{ steps.commit-handoff.outputs.next_agent }}';
+              fromAgent = '${{ steps.commit-handoff.outputs.from_agent }}';
+              task = '${{ steps.commit-handoff.outputs.task }}';
+              reference = `commit ${{ steps.commit-handoff.outputs.commit_sha }}`;
+            } else {
+              nextAgent = '${{ steps.pr-handoff.outputs.next_agent }}';
+              fromAgent = '${{ steps.pr-handoff.outputs.from_agent }}';
+              task = context.payload.pull_request.title;
+              reference = `PR #${{ steps.pr-handoff.outputs.pr_number }}`;
+            }
+            
+            // Create issue for handoff
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Handoff] ${task} - ${nextAgent}`,
+              body: `## Handoff from ${fromAgent}
+            
+            **Task**: ${task}
+            **From**: ${fromAgent}
+            **To**: ${nextAgent}
+            **Reference**: ${reference}
+            
+            ### Context
+            ${isCommitHandoff ? 'This handoff was triggered by a commit.' : 'This handoff was triggered by a PR.'}
+            
+            ### Next Steps
+            1. Review the ${isCommitHandoff ? 'commit' : 'PR'} for full context
+            2. Check your agent context file: \`@agent-context/${nextAgent.substring(1)}.md\`
+            3. Update \`@current-work\` when starting
+            4. See \`@api-contracts\` for any new endpoints
+            
+            ### Resources
+            - [View ${isCommitHandoff ? 'Commit' : 'PR'}](${context.payload.repository.html_url}/${isCommitHandoff ? 'commit/' + context.sha : 'pull/' + context.payload.pull_request.number})
+            - [Agent Context](${context.payload.repository.html_url}/blob/main/@agent-context/${nextAgent.substring(1)}.md)
+            - [Current Work Status](${context.payload.repository.html_url}/blob/main/@current-work)
+            
+            cc ${nextAgent}`,
+              labels: ['handoff', 'agent-coordination', nextAgent.substring(1)],
+              assignees: [] // Note: Can't auto-assign without knowing GitHub usernames
+            });
+            
+            console.log(`Created handoff issue #${issue.data.number}`);
+            
+            // Add comment to PR if this was a PR handoff
+            if (isPRHandoff) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `🤝 Handoff issue created: #${issue.data.number} for ${nextAgent}`
+              });
+            }
+      
+      - name: Commit Status Updates
+        if: steps.commit-handoff.outputs.handoff_detected == 'true'
+        run: |
+          # Configure git
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Add and commit the changes
+          git add @current-work @blockers @handoffs.log
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update agent coordination files [automated]
+            
+            - Updated @current-work with handoff status
+            - Updated @blockers if unblock mentioned
+            - Added entry to @handoffs.log
+            
+            Triggered by: ${{ github.sha }}"
+            
+            git push
+          fi
+      
+      - name: Update Metrics
+        if: steps.commit-handoff.outputs.handoff_detected == 'true' || steps.pr-handoff.outputs.handoff_detected == 'true'
+        run: |
+          # Run metrics update if handoff detected
+          if [ -f "scripts/agent-metrics.js" ]; then
+            node scripts/agent-metrics.js || echo "Metrics update failed (non-critical)"
+          fi
+
+  check-blockers:
+    runs-on: ubuntu-latest
+    name: Check and Report Blockers
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Analyze Blockers
+        id: analyze
+        run: |
+          if [ -f "@blockers" ]; then
+            # Count active blockers
+            ACTIVE_BLOCKERS=$(grep -c "❌" @blockers || echo 0)
+            echo "active_blockers=$ACTIVE_BLOCKERS" >> $GITHUB_OUTPUT
+            
+            # Get blocker details
+            if [ $ACTIVE_BLOCKERS -gt 0 ]; then
+              echo "has_blockers=true" >> $GITHUB_OUTPUT
+              BLOCKER_LIST=$(grep "❌" @blockers | tail -5)
+              echo "blocker_list<<EOF" >> $GITHUB_OUTPUT
+              echo "$BLOCKER_LIST" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "has_blockers=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+      
+      - name: Create Blocker Summary
+        if: steps.analyze.outputs.has_blockers == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const activeBlockers = ${{ steps.analyze.outputs.active_blockers }};
+            const blockerList = `${{ steps.analyze.outputs.blocker_list }}`;
+            
+            // Check if we already have an open blocker summary issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'blocker-summary',
+              state: 'open'
+            });
+            
+            const body = `## 🚧 Active Blockers Summary
+            
+            **Total Active Blockers**: ${activeBlockers}
+            
+            ### Recent Blockers
+            \`\`\`
+            ${blockerList}
+            \`\`\`
+            
+            ### Actions Needed
+            - Review blockers and assign owners
+            - Update \`@blockers\` when resolved
+            - Check \`@current-work\` for related tasks
+            
+            ---
+            *This issue is automatically updated when blockers change.*
+            *Last updated: ${new Date().toISOString()}*`;
+            
+            if (issues.data.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: body
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚧 Active Blockers - Action Required',
+                body: body,
+                labels: ['blocker-summary', 'agent-coordination', 'priority']
+              });
+            }

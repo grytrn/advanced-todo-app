@@ -1,0 +1,45 @@
+{
+  "files": {
+    "backend/src/api/auth/*": {
+      "agent": "@backend-01",
+      "locked_until": "2025-01-16T00:00:00Z",
+      "branch": "feature/backend-auth",
+      "description": "Implementing JWT authentication endpoints"
+    },
+    "backend/src/api/products/*": {
+      "agent": "@fullstack-01",
+      "locked_until": "2025-01-16T00:00:00Z",
+      "branch": "feature/fullstack-products",
+      "description": "Product CRUD API"
+    },
+    "frontend/src/components/Products/*": {
+      "agent": "@fullstack-01",
+      "locked_until": "2025-01-16T00:00:00Z",
+      "branch": "feature/fullstack-products",
+      "description": "Product UI components"
+    },
+    "frontend/src/components/Auth/*": {
+      "agent": null,
+      "locked_until": null,
+      "branch": null,
+      "description": "Waiting for backend auth completion"
+    },
+    "shared/types/auth.ts": {
+      "agent": "@backend-01",
+      "locked_until": "2025-01-16T00:00:00Z",
+      "branch": "feature/backend-auth",
+      "description": "Auth type definitions"
+    },
+    "shared/types/product.ts": {
+      "agent": "@fullstack-01",
+      "locked_until": "2025-01-16T00:00:00Z",
+      "branch": "feature/fullstack-products",
+      "description": "Product type definitions"
+    }
+  },
+  "rules": {
+    "lock_duration_hours": 24,
+    "auto_unlock_stale": true,
+    "require_description": true
+  }
+}

@@ -1,0 +1,381 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id                    String                  @id @default(cuid())
+  email                 String                  @unique
+  passwordHash          String                  // bcrypt hash
+  name                  String
+  avatar                String?                 // Avatar URL
+  bio                   String?                 // User bio
+  isActive              Boolean                 @default(true)
+  emailVerified         Boolean                 @default(false)
+  emailVerificationToken String?                @unique
+  emailVerificationExpiry DateTime?
+  passwordResetToken    String?                 @unique
+  passwordResetExpiry   DateTime?
+  twoFactorEnabled      Boolean                 @default(false)
+  twoFactorSecret       String?                 // TOTP secret
+  backupCodes           String[]                @default([]) // 2FA backup codes
+  loginAttempts         Int                     @default(0)
+  lockedUntil           DateTime?
+  lastLoginAt           DateTime?
+  lastLoginIp           String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  
+  // Relations
+  todos                 Todo[]
+  categories            Category[]
+  preferences           UserPreferences?
+  sessions              Session[]               // Changed from refreshTokens
+  oauthAccounts         OAuthAccount[]
+  apiKeys               ApiKey[]
+  auditLogs             AuditLog[]
+  roles                 UserRole[]
+  exportJobs            ExportJob[]
+  exportSchedules       ExportSchedule[]
+  exportTemplates       ExportTemplate[]
+  comments              Comment[]
+  activities            Activity[]
+  
+  @@index([email])
+  @@index([emailVerificationToken])
+  @@index([passwordResetToken])
+  @@map("users")
+}
+
+// User preferences
+model UserPreferences {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme               String   @default("system") // light, dark, system
+  emailReminders      Boolean  @default(true)
+  pushNotifications   Boolean  @default(false)
+  defaultTodoView     String   @default("list") // list, board, calendar
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@map("user_preferences")
+}
+
+// Session model for managing user sessions
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("sessions")
+}
+
+// OAuth accounts for social login
+model OAuthAccount {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider         String   // google, github, etc.
+  providerAccountId String
+  accessToken      String?  @db.Text
+  refreshToken     String?  @db.Text
+  expiresAt        DateTime?
+  tokenType        String?
+  scope            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("oauth_accounts")
+}
+
+// API Keys for external integrations
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  key         String    @unique
+  scopes      String[]  @default([])
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([key])
+  @@map("api_keys")
+}
+
+// Audit logs for security events
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String   // login, logout, password_change, etc.
+  resource    String?  // todo, category, user, etc.
+  resourceId  String?
+  details     Json?    // Additional details about the action
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Role model for RBAC
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  permissions String[]     @default([])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relations
+  users       UserRole[]
+  
+  @@map("roles")
+}
+
+// User-Role junction table
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+// Category model for organizing todos
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  icon      String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  todos     Todo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("categories")
+}
+
+// Tag model for flexible labeling
+model Tag {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  color     String      // Tag color
+  todos     TodoTag[]
+  createdAt DateTime    @default(now())
+  
+  @@index([name])
+  @@map("tags")
+}
+
+// TodoTag junction table
+model TodoTag {
+  id        String   @id @default(cuid())
+  todoId    String
+  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([todoId, tagId])
+  @@index([todoId])
+  @@index([tagId])
+  @@map("todo_tags")
+}
+
+// Todo model - the core entity
+model Todo {
+  id          String       @id @default(cuid())
+  title       String
+  description String?      @db.Text
+  status      String       @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED, ARCHIVED
+  priority    String       @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  position    Int          // For ordering
+  dueDate     DateTime?
+  reminder    DateTime?
+  isRecurring Boolean      @default(false)
+  recurrence  String?      // DAILY, WEEKLY, MONTHLY, YEARLY, CUSTOM
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId  String?
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags        TodoTag[]
+  shares      TodoShare[]  // Todo sharing
+  attachments Attachment[]
+  comments    Comment[]
+  activities  Activity[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  completedAt DateTime?
+  deletedAt   DateTime?    // Soft delete
+  
+  @@index([userId, status])
+  @@index([userId, categoryId])
+  @@index([userId, position])
+  @@index([dueDate])
+  @@index([deletedAt])
+  @@map("todos")
+}
+
+// Attachment model
+model Attachment {
+  id         String   @id @default(cuid())
+  todoId     String
+  todo       Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  filename   String
+  url        String
+  mimeType   String
+  size       Int      // Size in bytes
+  uploadedAt DateTime @default(now())
+  
+  @@index([todoId])
+  @@map("attachments")
+}
+
+// Comment model
+model Comment {
+  id        String   @id @default(cuid())
+  todoId    String
+  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([todoId])
+  @@index([userId])
+  @@map("comments")
+}
+
+// Activity log for todos
+model Activity {
+  id        String   @id @default(cuid())
+  todoId    String
+  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // CREATED, UPDATED, COMPLETED, DELETED, etc.
+  details   Json?    // Additional action details
+  createdAt DateTime @default(now())
+  
+  @@index([todoId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activities")
+}
+
+// Todo sharing model for permissions
+model TodoShare {
+  id         String   @id @default(cuid())
+  todoId     String
+  todo       Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  sharedWithEmail String
+  permission String   @default("view") // view, edit
+  createdAt  DateTime @default(now())
+  
+  @@unique([todoId, sharedWithEmail])
+  @@index([sharedWithEmail])
+  @@map("todo_shares")
+}
+
+// Export job model
+model ExportJob {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  format      String    // PDF, CSV, JSON, MARKDOWN, ICAL
+  status      String    // PENDING, PROCESSING, COMPLETED, FAILED, EXPIRED
+  options     Json      // Export options
+  fileUrl     String?   // Path to generated file
+  fileName    String?
+  fileSize    Int?      // File size in bytes
+  error       String?   // Error message if failed
+  progress    Int?      @default(0) // Progress percentage
+  startedAt   DateTime?
+  completedAt DateTime?
+  expiresAt   DateTime? // When the file will be deleted
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("export_jobs")
+}
+
+// Export schedule model for recurring exports
+model ExportSchedule {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  frequency     String   // ONCE, DAILY, WEEKLY, MONTHLY
+  format        String   // Export format
+  options       Json     // Export options
+  emailDelivery Json     // Email delivery settings
+  nextRunAt     DateTime
+  lastRunAt     DateTime?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([nextRunAt])
+  @@map("export_schedules")
+}
+
+// Export template model
+model ExportTemplate {
+  id          String   @id @default(cuid())
+  userId      String?  // null for system templates
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  format      String   // PDF, etc.
+  content     String   @db.Text // Template content
+  isDefault   Boolean  @default(false)
+  isPublic    Boolean  @default(false)
+  variables   String[] @default([]) // Available template variables
+  previewUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([format])
+  @@map("export_templates")
+}
+

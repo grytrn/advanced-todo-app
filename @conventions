@@ -1,0 +1,77 @@
+# Project Conventions
+
+## Database
+- All tables use UUID primary keys (not auto-increment)
+- Timestamps: created_at, updated_at on all tables (handled by Prisma)
+- Soft deletes: deleted_at timestamp, never hard delete
+- Money: Store in cents as integers (e.g., $10.99 = 1099)
+- Phone numbers: E.164 format (+1234567890)
+- Timezone: All dates/times in UTC
+
+## API Conventions
+- RESTful endpoints only
+- Versioning: /api/v1/...
+- Pagination: ?page=1&limit=20 (default limit=20, max=100)
+- Sorting: ?sortBy=created_at&sortOrder=desc
+- Filtering: ?filter[status]=active&filter[role]=admin
+- Response format: { success: boolean, data?: T, error?: {...} }
+- HTTP status: 200 for all successful responses (check success field)
+- Use 4xx/5xx only for HTTP-level errors (not found, auth, server error)
+- Always validate input with Zod schemas
+
+## TypeScript Conventions
+- NO default exports (except Next.js pages)
+- Import order: Node built-ins, external packages, internal imports, types
+- File naming: kebab-case.ts (user-service.ts)
+- Component naming: PascalCase.tsx (UserProfile.tsx)
+- Explicit return types on all functions
+- Prefer interfaces over types for objects
+- Use enums for fixed sets of values
+
+## Git Conventions
+- Squash merge to main
+- Delete branches after merge
+- Branch protection on main
+- Require PR reviews (when multiple people)
+- Tag releases as v1.0.0
+
+## Testing Conventions
+- Test files next to source: user.service.test.ts
+- Integration tests: backend/tests/integration/
+- E2E tests: tests/e2e/
+- Mock files: __mocks__/
+- Minimum 80% coverage, 100% for critical paths
+- Test file structure: describe > it
+- Use meaningful test names: "should return 401 when token is invalid"
+
+## Frontend Conventions
+- Component structure: components/Button/Button.tsx, Button.test.tsx, index.ts
+- One component per file
+- Props interfaces named: [Component]Props
+- Use custom hooks for logic extraction
+- Colocate styles with components
+- Mobile-first responsive design
+
+## Error Handling
+- Never throw strings, always Error objects
+- Create custom error classes for different scenarios
+- Always catch and handle errors appropriately
+- Log errors with context (user ID, request ID, etc.)
+- User-facing messages should be helpful, not technical
+
+## Security
+- Never trust user input
+- Always use parameterized queries
+- Hash passwords with bcrypt (10 rounds minimum)
+- JWT secrets minimum 32 characters
+- Rate limit all endpoints
+- CORS configured explicitly
+- CSP headers in production
+
+## Performance
+- Database queries should use indexes
+- Implement pagination for lists
+- Cache static data in Redis
+- Lazy load images and components
+- Bundle splitting for routes
+- Target: <200ms API response time

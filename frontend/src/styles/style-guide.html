@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TODO App Style Guide</title>
+  <link rel="stylesheet" href="./design-system.css">
+  <style>
+    .guide-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-8);
+    }
+    .guide-section {
+      margin-bottom: var(--spacing-16);
+    }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-6);
+      margin-top: var(--spacing-6);
+    }
+    .color-swatch {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-4);
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+    }
+    .color-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    .spacing-demo {
+      background: var(--color-primary-100);
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-2);
+    }
+    .component-demo {
+      padding: var(--spacing-6);
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--spacing-4);
+    }
+    .code-block {
+      background: var(--color-gray-900);
+      color: var(--color-gray-100);
+      padding: var(--spacing-4);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin-top: var(--spacing-2);
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- Include icon sprite -->
+  <div style="display: none;">
+    <object data="../assets/icons/todo-icons.svg" type="image/svg+xml"></object>
+  </div>
+
+  <!-- Theme Toggle -->
+  <div class="theme-toggle" onclick="toggleTheme()">
+    <div class="theme-toggle-slider">
+      <svg width="16" height="16">
+        <use href="#icon-sun" class="theme-icon-light"/>
+        <use href="#icon-moon" class="theme-icon-dark" style="display: none;"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="guide-container">
+    <h1 class="heading-1">TODO App Style Guide</h1>
+    <p class="text-body">A comprehensive guide to the design system and UI components for the TODO application.</p>
+
+    <!-- Colors Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Color Palette</h2>
+      
+      <h3 class="heading-4">Primary Colors</h3>
+      <div class="guide-grid">
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-primary-50);"></div>
+          <div>
+            <div class="text-small"><strong>Primary 50</strong></div>
+            <div class="text-tiny">--color-primary-50</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-primary-300);"></div>
+          <div>
+            <div class="text-small"><strong>Primary 300</strong></div>
+            <div class="text-tiny">--color-primary-300</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-primary-500);"></div>
+          <div>
+            <div class="text-small"><strong>Primary 500</strong></div>
+            <div class="text-tiny">--color-primary-500</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-primary-700);"></div>
+          <div>
+            <div class="text-small"><strong>Primary 700</strong></div>
+            <div class="text-tiny">--color-primary-700</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="heading-4 mt-4">Accent Colors</h3>
+      <div class="guide-grid">
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-accent-purple);"></div>
+          <div>
+            <div class="text-small"><strong>Purple</strong></div>
+            <div class="text-tiny">--color-accent-purple</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-accent-pink);"></div>
+          <div>
+            <div class="text-small"><strong>Pink</strong></div>
+            <div class="text-tiny">--color-accent-pink</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-accent-green);"></div>
+          <div>
+            <div class="text-small"><strong>Green</strong></div>
+            <div class="text-tiny">--color-accent-green</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--color-accent-orange);"></div>
+          <div>
+            <div class="text-small"><strong>Orange</strong></div>
+            <div class="text-tiny">--color-accent-orange</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="heading-4 mt-4">Gradients</h3>
+      <div class="guide-grid">
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--gradient-primary);"></div>
+          <div>
+            <div class="text-small"><strong>Primary Gradient</strong></div>
+            <div class="text-tiny">--gradient-primary</div>
+          </div>
+        </div>
+        <div class="color-swatch">
+          <div class="color-preview" style="background: var(--gradient-success);"></div>
+          <div>
+            <div class="text-small"><strong>Success Gradient</strong></div>
+            <div class="text-tiny">--gradient-success</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Typography Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Typography</h2>
+      
+      <div class="component-demo">
+        <h1 class="heading-1">Heading 1 - 48px</h1>
+        <h2 class="heading-2">Heading 2 - 36px</h2>
+        <h3 class="heading-3">Heading 3 - 30px</h3>
+        <h4 class="heading-4">Heading 4 - 24px</h4>
+        <h5 class="heading-5">Heading 5 - 20px</h5>
+        <p class="text-body">Body text - 16px. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <p class="text-small">Small text - 14px. Used for secondary information and metadata.</p>
+        <p class="text-tiny">Tiny text - 12px. Used for labels and captions.</p>
+      </div>
+
+      <div class="code-block">
+&lt;h1 class="heading-1"&gt;Heading 1&lt;/h1&gt;
+&lt;p class="text-body"&gt;Body text&lt;/p&gt;
+&lt;span class="text-small"&gt;Small text&lt;/span&gt;</div>
+    </section>
+
+    <!-- Spacing Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Spacing System</h2>
+      <p class="text-body">Based on 8px unit for consistent rhythm</p>
+      
+      <div class="mt-4">
+        <div class="spacing-demo" style="width: var(--spacing-1);">4px</div>
+        <div class="spacing-demo" style="width: var(--spacing-2);">8px</div>
+        <div class="spacing-demo" style="width: var(--spacing-4);">16px</div>
+        <div class="spacing-demo" style="width: var(--spacing-6);">24px</div>
+        <div class="spacing-demo" style="width: var(--spacing-8);">32px</div>
+      </div>
+    </section>
+
+    <!-- Buttons Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Buttons</h2>
+      
+      <div class="component-demo">
+        <h3 class="heading-4">Button Variants</h3>
+        <div class="flex gap-3" style="flex-wrap: wrap;">
+          <button class="btn btn-primary">Primary Button</button>
+          <button class="btn btn-secondary">Secondary Button</button>
+          <button class="btn btn-ghost">Ghost Button</button>
+          <button class="btn btn-primary" disabled>Disabled</button>
+        </div>
+
+        <h3 class="heading-4 mt-4">Button Sizes</h3>
+        <div class="flex gap-3 items-center" style="flex-wrap: wrap;">
+          <button class="btn btn-primary btn-sm">Small</button>
+          <button class="btn btn-primary">Default</button>
+          <button class="btn btn-primary btn-lg">Large</button>
+        </div>
+
+        <h3 class="heading-4 mt-4">Icon Buttons</h3>
+        <div class="flex gap-3">
+          <button class="btn btn-primary btn-icon" aria-label="Add task">
+            <svg width="20" height="20"><use href="#icon-add-task"/></svg>
+          </button>
+          <button class="btn btn-secondary btn-icon" aria-label="Edit">
+            <svg width="20" height="20"><use href="#icon-edit"/></svg>
+          </button>
+          <button class="btn btn-ghost btn-icon" aria-label="Delete">
+            <svg width="20" height="20"><use href="#icon-trash"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="code-block">
+&lt;button class="btn btn-primary"&gt;Primary Button&lt;/button&gt;
+&lt;button class="btn btn-secondary btn-sm"&gt;Small Secondary&lt;/button&gt;
+&lt;button class="btn btn-icon" aria-label="Add"&gt;
+  &lt;svg&gt;&lt;use href="#icon-add-task"/&gt;&lt;/svg&gt;
+&lt;/button&gt;</div>
+    </section>
+
+    <!-- Form Inputs Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Form Inputs</h2>
+      
+      <div class="component-demo">
+        <div class="input-group">
+          <label class="input-label" for="input-default">Default Input</label>
+          <input type="text" id="input-default" class="input" placeholder="Enter task name...">
+          <span class="input-helper">Helper text for additional information</span>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="input-error">Error State</label>
+          <input type="text" id="input-error" class="input input-error" value="Invalid input">
+          <span class="input-helper input-error-message">This field is required</span>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="input-success">Success State</label>
+          <input type="text" id="input-success" class="input input-success" value="Valid input">
+          <span class="input-helper" style="color: var(--color-accent-green);">Looking good!</span>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="input-disabled">Disabled Input</label>
+          <input type="text" id="input-disabled" class="input" disabled value="Cannot edit">
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Cards</h2>
+      
+      <div class="guide-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Card Title</h3>
+          </div>
+          <div class="card-body">
+            <p>This is a card component with hover effects and gradient accent on hover.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Interactive Card</h3>
+          </div>
+          <div class="card-body">
+            <p>Cards lift up on hover with smooth transitions.</p>
+            <button class="btn btn-primary btn-sm mt-3">Action</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TODO Components Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">TODO Components</h2>
+      
+      <div class="component-demo">
+        <div class="todo-item">
+          <span class="todo-priority high"></span>
+          <div class="todo-checkbox"></div>
+          <span class="todo-text">High priority task</span>
+          <button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit">
+            <svg width="16" height="16"><use href="#icon-edit"/></svg>
+          </button>
+        </div>
+
+        <div class="todo-item">
+          <span class="todo-priority medium"></span>
+          <div class="todo-checkbox checked"></div>
+          <span class="todo-text completed">Completed task with medium priority</span>
+          <button class="btn btn-ghost btn-icon btn-sm" aria-label="Delete">
+            <svg width="16" height="16"><use href="#icon-trash"/></svg>
+          </button>
+        </div>
+
+        <div class="todo-item">
+          <span class="todo-priority low"></span>
+          <div class="todo-checkbox"></div>
+          <span class="todo-text">Low priority task with additional info</span>
+          <span class="text-tiny" style="color: var(--color-text-muted);">Due tomorrow</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modals Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Modals & Toasts</h2>
+      
+      <div class="component-demo">
+        <button class="btn btn-primary" onclick="showModal()">Show Modal</button>
+        <button class="btn btn-secondary" onclick="showToast('success')">Success Toast</button>
+        <button class="btn btn-secondary" onclick="showToast('error')">Error Toast</button>
+        <button class="btn btn-secondary" onclick="showToast('info')">Info Toast</button>
+      </div>
+
+      <!-- Modal Example (hidden by default) -->
+      <div class="modal-backdrop" id="modal" style="display: none;" onclick="hideModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h3 class="modal-title">Example Modal</h3>
+          </div>
+          <div class="modal-body">
+            <p>This is a modal dialog with animations and backdrop.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+            <button class="btn btn-primary">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading States Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Loading States</h2>
+      
+      <div class="component-demo">
+        <h3 class="heading-4">Skeleton Loading</h3>
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton skeleton-button mt-3"></div>
+
+        <h3 class="heading-4 mt-4">Spinners</h3>
+        <div class="flex gap-3 items-center">
+          <div class="spinner"></div>
+          <button class="btn btn-primary" disabled>
+            <div class="spinner" style="border-top-color: white;"></div>
+            Loading...
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Icons Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Icons</h2>
+      
+      <div class="component-demo">
+        <div class="guide-grid">
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-add-task"/></svg>
+            <span class="text-small">Add Task</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-check"/></svg>
+            <span class="text-small">Check</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-star"/></svg>
+            <span class="text-small">Priority</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-calendar"/></svg>
+            <span class="text-small">Calendar</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-tag"/></svg>
+            <span class="text-small">Tag</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-trash"/></svg>
+            <span class="text-small">Delete</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-edit"/></svg>
+            <span class="text-small">Edit</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <svg width="24" height="24"><use href="#icon-filter"/></svg>
+            <span class="text-small">Filter</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Accessibility Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Accessibility Guidelines</h2>
+      
+      <div class="component-demo">
+        <h3 class="heading-4">Best Practices</h3>
+        <ul class="text-body">
+          <li>All interactive elements have minimum 44x44px touch targets</li>
+          <li>Focus indicators are clearly visible with 2px outline</li>
+          <li>Color contrast ratios meet WCAG AA standards</li>
+          <li>All icon buttons include aria-label attributes</li>
+          <li>Form inputs have associated labels</li>
+          <li>Error messages are announced to screen readers</li>
+          <li>Keyboard navigation is fully supported</li>
+        </ul>
+
+        <h3 class="heading-4 mt-4">Screen Reader Support</h3>
+        <div class="code-block">
+&lt;!-- Skip to main content link --&gt;
+&lt;a href="#main" class="skip-link"&gt;Skip to main content&lt;/a&gt;
+
+&lt;!-- Visually hidden text for screen readers --&gt;
+&lt;span class="sr-only"&gt;Task completed&lt;/span&gt;
+
+&lt;!-- ARIA labels for icon buttons --&gt;
+&lt;button aria-label="Delete task" class="btn btn-icon"&gt;
+  &lt;svg&gt;&lt;use href="#icon-trash"/&gt;&lt;/svg&gt;
+&lt;/button&gt;</div>
+      </div>
+    </section>
+
+    <!-- Animation Effects Section -->
+    <section class="guide-section">
+      <h2 class="heading-2">Animation Effects</h2>
+      
+      <div class="component-demo">
+        <h3 class="heading-4">Interactive Demos</h3>
+        <div class="flex gap-3" style="flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="showParticles(event)">Particle Burst</button>
+          <button class="btn btn-primary" onclick="showConfetti()">Confetti Rain</button>
+          <button class="btn btn-primary" onclick="showSuccess()">Success Animation</button>
+        </div>
+
+        <h3 class="heading-4 mt-4">Transition Timings</h3>
+        <ul class="text-body">
+          <li><strong>Fast:</strong> 150ms - Hover effects, small transitions</li>
+          <li><strong>Base:</strong> 200ms - Standard transitions</li>
+          <li><strong>Slow:</strong> 300ms - Modal appearances, complex animations</li>
+          <li><strong>Spring:</strong> 500ms cubic-bezier - Bouncy animations</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { particleSystem } from '../utils/particle-effects.js';
+
+    // Theme toggle
+    window.toggleTheme = function() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      
+      // Update toggle appearance
+      const toggle = document.querySelector('.theme-toggle');
+      toggle.classList.toggle('dark');
+      
+      // Update icons
+      document.querySelector('.theme-icon-light').style.display = newTheme === 'dark' ? 'none' : 'block';
+      document.querySelector('.theme-icon-dark').style.display = newTheme === 'dark' ? 'block' : 'none';
+    };
+
+    // Modal functions
+    window.showModal = function() {
+      document.getElementById('modal').style.display = 'flex';
+    };
+
+    window.hideModal = function(event) {
+      if (!event || event.target.classList.contains('modal-backdrop')) {
+        document.getElementById('modal').style.display = 'none';
+      }
+    };
+
+    // Toast function
+    window.showToast = function(type) {
+      const messages = {
+        success: 'Task completed successfully!',
+        error: 'Something went wrong. Please try again.',
+        info: 'New updates are available.'
+      };
+      
+      particleSystem.createFloatingNotification(messages[type], type);
+    };
+
+    // Animation demos
+    window.showParticles = function(event) {
+      const rect = event.target.getBoundingClientRect();
+      particleSystem.createBurst(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2
+      );
+    };
+
+    window.showConfetti = function() {
+      particleSystem.createConfettiRain();
+    };
+
+    window.showSuccess = function() {
+      const button = event.target;
+      particleSystem.createSuccessAnimation(button);
+    };
+
+    // Add ripple effect to buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.btn')) {
+        particleSystem.createRipple(e);
+      }
+    });
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (savedTheme === 'dark') {
+      document.querySelector('.theme-toggle').classList.add('dark');
+      document.querySelector('.theme-icon-light').style.display = 'none';
+      document.querySelector('.theme-icon-dark').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
