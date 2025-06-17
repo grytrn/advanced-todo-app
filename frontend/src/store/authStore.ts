@@ -14,6 +14,7 @@ interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
+  token: string | null
   login: (email: string, password: string) => Promise<void>
   signup: (email: string, password: string, name: string) => Promise<void>
   logout: () => Promise<void>
@@ -22,10 +23,11 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      token: null,
 
       login: async (email: string, password: string) => {
         set({ isLoading: true })
@@ -35,6 +37,7 @@ export const useAuthStore = create<AuthState>()(
             user: response.user,
             isAuthenticated: true,
             isLoading: false,
+            token: response.accessToken,
           })
           toast.success('Welcome back!')
         } catch (error) {
@@ -52,6 +55,7 @@ export const useAuthStore = create<AuthState>()(
             user: response.user,
             isAuthenticated: true,
             isLoading: false,
+            token: response.accessToken,
           })
           toast.success('Account created successfully!')
         } catch (error) {
@@ -67,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isAuthenticated: false,
+            token: null,
           })
           toast.success('Logged out successfully')
         } catch (error) {
@@ -86,13 +91,17 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isAuthenticated: false,
+            token: null,
           })
         }
       },
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({ 
+        isAuthenticated: state.isAuthenticated,
+        token: state.token,
+      }),
     }
   )
 )

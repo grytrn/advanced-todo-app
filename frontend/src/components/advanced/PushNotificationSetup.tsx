@@ -29,6 +29,7 @@ export const PushNotificationSetup: React.FC = () => {
         return () => clearTimeout(timer)
       }
     }
+    return () => {} // Ensure all code paths return
   }, [])
 
   const requestPermission = async () => {

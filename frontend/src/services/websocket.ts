@@ -1,6 +1,5 @@
 import { Socket } from 'socket.io-client'
-import { useTodoStore } from '../store/todoStore'
-import { Todo } from '@/shared/types/todo'
+import { useTodoStore, type Todo } from '../store/todoStore'
 
 export function setupWebSocketHandlers(socket: Socket) {
   const store = useTodoStore.getState()
@@ -19,17 +18,17 @@ export function setupWebSocketHandlers(socket: Socket) {
   })
 
   // Category events (if needed)
-  socket.on('category:created', (data: any) => {
+  socket.on('category:created', () => {
     // Re-fetch categories
     store.fetchCategories()
   })
 
-  socket.on('category:updated', (data: any) => {
+  socket.on('category:updated', () => {
     // Re-fetch categories
     store.fetchCategories()
   })
 
-  socket.on('category:deleted', (data: any) => {
+  socket.on('category:deleted', () => {
     // Re-fetch categories
     store.fetchCategories()
   })

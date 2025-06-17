@@ -1,6 +1,6 @@
 import { useEffect, useState, Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
@@ -8,12 +8,12 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
-import { useTodoStore, Todo } from '../store'
+import { useTodoStore } from '../store'
 import { cn } from '../utils'
 
 const todoSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  priority: z.enum(['low', 'medium', 'high']),
+  priority: z.enum(['low', 'medium', 'high']).default('medium'),
   categoryId: z.string().optional(),
   tags: z.array(z.string()).default([]),
   dueDate: z.string().optional(),
@@ -35,14 +35,13 @@ export function TodoModal({ isOpen, onClose, todoId }: TodoModalProps) {
   
   const {
     register,
-    control,
     handleSubmit,
     reset,
     watch,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<TodoFormData>({
-    resolver: zodResolver(todoSchema),
+    resolver: zodResolver(todoSchema) as any,
     defaultValues: {
       title: '',
       priority: 'medium',
@@ -99,8 +98,8 @@ export function TodoModal({ isOpen, onClose, todoId }: TodoModalProps) {
         await updateTodo(todoId, {
           ...data,
           content,
-          categoryId: data.categoryId || null,
-          dueDate: data.dueDate || null,
+          categoryId: data.categoryId || undefined,
+          dueDate: data.dueDate || undefined,
         })
       } else {
         await addTodo({
@@ -169,7 +168,7 @@ export function TodoModal({ isOpen, onClose, todoId }: TodoModalProps) {
                   </motion.button>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
                   {/* Title */}
                   <div>
                     <label htmlFor="title" className="block text-sm font-medium mb-2">

@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 interface OfflineState {
   isOnline: boolean
   syncQueue: SyncQueueItem[]
+  syncPending: boolean
   lastSyncTime: string | null
   conflictResolutions: ConflictResolution[]
   
@@ -13,6 +14,7 @@ interface OfflineState {
   addToSyncQueue: (item: SyncQueueItem) => void
   removeFromSyncQueue: (id: string) => void
   clearSyncQueue: () => void
+  setSyncPending: (pending: boolean) => void
   setLastSyncTime: (time: string) => void
   addConflictResolution: (resolution: ConflictResolution) => void
   resolveConflict: (id: string, resolution: 'local' | 'remote') => void
@@ -42,6 +44,7 @@ export const useOfflineStore = create<OfflineState>()(
     immer((set) => ({
       isOnline: navigator.onLine,
       syncQueue: [],
+      syncPending: false,
       lastSyncTime: null,
       conflictResolutions: [],
 
@@ -51,14 +54,23 @@ export const useOfflineStore = create<OfflineState>()(
 
       addToSyncQueue: (item) => set((state) => {
         state.syncQueue.push(item)
+        state.syncPending = true
       }),
 
       removeFromSyncQueue: (id) => set((state) => {
         state.syncQueue = state.syncQueue.filter(item => item.id !== id)
+        if (state.syncQueue.length === 0) {
+          state.syncPending = false
+        }
       }),
 
       clearSyncQueue: () => set((state) => {
         state.syncQueue = []
+        state.syncPending = false
+      }),
+
+      setSyncPending: (pending) => set((state) => {
+        state.syncPending = pending
       }),
 
       setLastSyncTime: (time) => set((state) => {

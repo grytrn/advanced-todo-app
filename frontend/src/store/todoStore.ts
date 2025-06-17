@@ -155,12 +155,14 @@ export const useTodoStore = create<TodoState>()(
     reorderTodos: (startIndex, endIndex) => {
       set((state) => {
         const [removed] = state.todos.splice(startIndex, 1)
-        state.todos.splice(endIndex, 0, removed)
-        
-        // Update order property
-        state.todos.forEach((todo, index) => {
-          todo.order = index
-        })
+        if (removed) {
+          state.todos.splice(endIndex, 0, removed)
+          
+          // Update order property
+          state.todos.forEach((todo, index) => {
+            todo.order = index
+          })
+        }
       })
       
       // Persist new order to backend

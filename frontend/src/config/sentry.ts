@@ -1,39 +1,10 @@
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 
 export function initSentry(): void {
   if (import.meta.env.VITE_SENTRY_DSN) {
     Sentry.init({
       dsn: import.meta.env.VITE_SENTRY_DSN,
       environment: import.meta.env.MODE || 'development',
-      integrations: [
-        new BrowserTracing({
-          // Set sampling rates
-          tracingOrigins: [
-            'localhost',
-            /^https:\/\/todo-app\.vercel\.app/,
-            /^https:\/\/todo-backend\.onrender\.com/,
-          ],
-          // Performance monitoring
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            React.useEffect,
-            useLocation,
-            useNavigationType,
-            createRoutesFromChildren,
-            matchRoutes
-          ),
-        }),
-        new Sentry.Replay({
-          // Capture 10% of all sessions
-          sessionSampleRate: 0.1,
-          // Capture 100% of sessions with an error
-          errorSampleRate: 1.0,
-          // Mask sensitive content
-          maskAllText: false,
-          maskAllInputs: true,
-          blockAllMedia: false,
-        }),
-      ],
       // Performance monitoring
       tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
       // Release tracking
@@ -41,7 +12,7 @@ export function initSentry(): void {
       // Only send errors in production
       enabled: import.meta.env.MODE === 'production',
       // Filter out expected errors
-      beforeSend(event, hint) {
+      beforeSend(event) {
         // Filter out network errors
         if (event.exception?.values?.[0]?.value?.includes('Network request failed')) {
           return null;

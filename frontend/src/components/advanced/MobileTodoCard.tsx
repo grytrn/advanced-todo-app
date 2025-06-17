@@ -30,7 +30,7 @@ export const MobileTodoCard: React.FC<MobileTodoCardProps> = ({
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const threshold = 100
     
     if (info.offset.x > threshold) {

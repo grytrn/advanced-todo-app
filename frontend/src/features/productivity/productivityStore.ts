@@ -351,9 +351,9 @@ function processRelativeDate(relativeDate: string): string {
   if (!matches) return relativeDate
   
   const [, sign, amount, unit] = matches
-  const value = parseInt(amount) * (sign === '+' ? 1 : -1)
+  const value = parseInt(amount || '0') * (sign === '+' ? 1 : -1)
   
-  switch (unit.toLowerCase()) {
+  switch (unit?.toLowerCase()) {
     case 'd':
       now.setDate(now.getDate() + value)
       break

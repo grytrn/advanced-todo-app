@@ -279,7 +279,7 @@ function getAverageDailyTasks(data: { date: string; completed: number }[]) {
 
 function getFocusTrend(data: { date: string; sessions: number }[]) {
   const recent = data.slice(-3)
-  const trend = recent[2].sessions - recent[0].sessions
+  const trend = (recent[2]?.sessions || 0) - (recent[0]?.sessions || 0)
   if (trend > 0) return `📈 Up ${trend} sessions`
   if (trend < 0) return `📉 Down ${Math.abs(trend)} sessions`
   return '➡️ Stable'

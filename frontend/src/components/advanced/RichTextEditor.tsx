@@ -12,9 +12,8 @@ import {
   BoldIcon,
   ItalicIcon,
   StrikethroughIcon,
-  CodeIcon,
+  CodeBracketIcon,
   ListBulletIcon,
-  ListNumberedIcon,
   ChatBubbleBottomCenterTextIcon,
   LinkIcon,
   PhotoIcon,
@@ -22,10 +21,9 @@ import {
   FaceSmileIcon,
   AtSymbolIcon,
   CommandLineIcon,
-  ChevronDownIcon,
 } from '@heroicons/react/24/outline'
 import { motion, AnimatePresence } from 'framer-motion'
-import EmojiPicker from 'emoji-picker-react'
+import EmojiPicker, { Theme } from 'emoji-picker-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -193,7 +191,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         setSelectedSlashIndex(i => (i - 1 + SlashCommands.length) % SlashCommands.length)
       } else if (e.key === 'Enter') {
         e.preventDefault()
-        handleSlashCommand(SlashCommands[selectedSlashIndex])
+        handleSlashCommand(SlashCommands[selectedSlashIndex]!)
       } else if (e.key === 'Escape') {
         setShowSlashMenu(false)
       }
@@ -239,7 +237,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => editor.chain().focus().toggleCode().run()}
             title="Inline code"
           >
-            <CodeIcon className="w-4 h-4" />
+            <CodeBracketIcon className="w-4 h-4" />
           </ToolbarButton>
         </div>
 
@@ -259,7 +257,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             title="Ordered list"
           >
-            <ListNumberedIcon className="w-4 h-4" />
+            <ListBulletIcon className="w-4 h-4" />
           </ToolbarButton>
           <ToolbarButton
             active={editor.isActive('blockquote')}
@@ -348,7 +346,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             >
               <EmojiPicker
                 onEmojiClick={insertEmoji}
-                theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+                theme={document.documentElement.classList.contains('dark') ? Theme.DARK : Theme.LIGHT}
               />
             </motion.div>
           )}
@@ -385,7 +383,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </AnimatePresence>
       </div>
 
-      <style jsx global>{`
+      <style>{`
         .ProseMirror {
           min-height: 200px;
         }

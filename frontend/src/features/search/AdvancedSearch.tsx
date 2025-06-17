@@ -259,8 +259,8 @@ function FilterBuilder({
   const addFilter = () => {
     if (newFilter.field && newFilter.operator && newFilter.value) {
       onAddFilter({
-        id: crypto.randomUUID(),
-        ...newFilter as SearchFilter
+        ...newFilter as SearchFilter,
+        id: crypto.randomUUID()
       })
       setNewFilter({ field: 'title', operator: 'contains', value: '' })
     }

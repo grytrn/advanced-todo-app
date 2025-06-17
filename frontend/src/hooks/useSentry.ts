@@ -11,16 +11,8 @@ export function useSentry() {
       Sentry.init({
         dsn: import.meta.env.VITE_SENTRY_DSN,
         environment: import.meta.env.MODE,
-        integrations: [
-          new Sentry.BrowserTracing(),
-          new Sentry.Replay({
-            maskAllText: false,
-            blockAllMedia: false,
-          }),
-        ],
+        // Basic configuration without advanced integrations
         tracesSampleRate: 0.1, // 10% of transactions
-        replaysSessionSampleRate: 0.1, // 10% of sessions
-        replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
       })
     }
   }, [])

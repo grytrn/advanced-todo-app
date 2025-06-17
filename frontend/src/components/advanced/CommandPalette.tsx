@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { 
   MagnifyingGlassIcon,
-  XMarkIcon,
   PlusIcon,
   CheckIcon,
   TrashIcon,
@@ -55,7 +54,6 @@ export const CommandPalette: React.FC = () => {
     toggleTodo, 
     deleteTodo,
     categories,
-    setSearchQuery,
     setFilterBy,
     setSortBy,
   } = useTodoStore()
@@ -408,7 +406,7 @@ export const CommandPalette: React.FC = () => {
                       <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                         {group.title}
                       </div>
-                      {group.commands.map((cmd, cmdIndex) => {
+                      {group.commands.map((cmd) => {
                         const globalIndex = allFilteredCommands.findIndex(c => c.id === cmd.id)
                         const isSelected = globalIndex === selectedIndex
                         

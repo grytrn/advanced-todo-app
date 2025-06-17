@@ -8,7 +8,6 @@ import {
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline'
 import { useThemeStore, useAuthStore, useTodoStore } from '../store'
-import { cn } from '../utils'
 
 export function Header() {
   const { theme, toggleTheme } = useThemeStore()

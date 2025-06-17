@@ -33,7 +33,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
     }
   }, [isOpen])
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.y > 100) {
       onClose()
     }

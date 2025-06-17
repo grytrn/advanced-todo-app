@@ -29,7 +29,7 @@ interface CalendarEvent {
 }
 
 export const CalendarView: React.FC = () => {
-  const { todos, updateTodo, toggleTodo } = useTodoStore()
+  const { todos, toggleTodo } = useTodoStore()
   const { theme } = useThemeStore()
   const [view, setView] = React.useState<View>('month')
   const [date, setDate] = React.useState(new Date())
@@ -51,10 +51,7 @@ export const CalendarView: React.FC = () => {
     toggleTodo(event.resource.id)
   }
 
-  const handleEventDrop = ({ event, start, end }: any) => {
-    // Update the due date when dragging and dropping
-    updateTodo(event.id, { dueDate: start.toISOString() })
-  }
+  // Removed drag-and-drop support as it's not available in react-big-calendar types
 
   const eventStyleGetter = (event: CalendarEvent) => {
     const todo = event.resource
@@ -137,19 +134,16 @@ export const CalendarView: React.FC = () => {
           date={date}
           onNavigate={setDate}
           onSelectEvent={handleSelectEvent}
-          onEventDrop={handleEventDrop}
           eventPropGetter={eventStyleGetter}
           components={{
             event: CustomEvent,
           }}
           style={{ height: 'calc(100vh - 200px)' }}
           popup
-          draggableAccessor={() => true}
-          resizable={false}
         />
       </div>
 
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .dark-calendar {
           filter: invert(0.9) hue-rotate(180deg);
         }
@@ -216,7 +210,7 @@ export const CalendarView: React.FC = () => {
         .dark .rbc-today {
           background-color: #1e3a8a;
         }
-      `}</style>
+      ` }} />
     </motion.div>
   )
 }

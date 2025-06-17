@@ -65,6 +65,7 @@ export function NetworkStatus() {
 export function DetailedNetworkStatus() {
   const { isOnline, syncQueue, lastSyncTime, conflictResolutions } = useOfflineStore()
   const unresolvedConflicts = conflictResolutions.filter(c => !c.resolved)
+  const hasPendingChanges = syncQueue.length > 0
 
   return (
     <div className="space-y-4">

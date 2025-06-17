@@ -2,23 +2,21 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore, useThemeStore } from './store'
 import { Layout, ProtectedRoute } from './components'
 import { LoginPage, SignupPage, DashboardPage, TodosPage, SettingsPage, NotFoundPage } from './pages'
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect } from 'react'
 import { CommandPalette, OfflineIndicator, ToastProvider } from './components/advanced'
-import { useKeyboardShortcuts, NetworkStatus, useOfflineStore } from './features'
+import { useKeyboardShortcuts, NetworkStatus } from './features'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useSentry } from './hooks/useSentry'
 
 function App() {
   const { theme } = useThemeStore()
   const { isAuthenticated, user } = useAuthStore()
-  const { isOnline, syncPending } = useOfflineStore()
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   
   // Initialize Sentry
   useSentry()
   
   // Initialize WebSocket connection for authenticated users
-  const { socket, isConnected } = useWebSocket({
+  useWebSocket({
     enabled: isAuthenticated,
     userId: user?.id,
   })
@@ -41,23 +39,17 @@ function App() {
     }
   }, [])
   
-  // Keyboard shortcuts
-  const handleOpenCommandPalette = useCallback(() => {
-    setCommandPaletteOpen(true)
-  }, [])
-  
-  useKeyboardShortcuts({
-    'cmd+k': handleOpenCommandPalette,
-    'ctrl+k': handleOpenCommandPalette,
-  })
+  // Initialize keyboard shortcuts
+  useKeyboardShortcuts()
 
   return (
-    <ToastProvider>
+    <>
+      <ToastProvider />
       <div className="min-h-screen bg-background gradient-mesh">
         {/* Global UI elements */}
-        <OfflineIndicator isOnline={isOnline} syncPending={syncPending} />
+        <OfflineIndicator />
         <NetworkStatus />
-        <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+        <CommandPalette />
         
         <Routes>
         {/* Public routes */}
@@ -82,7 +74,7 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
-    </ToastProvider>
+    </>
   )
 }
 

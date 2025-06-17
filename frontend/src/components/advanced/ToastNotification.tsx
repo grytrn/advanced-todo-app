@@ -8,7 +8,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
-import toast, { Toast, Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -108,23 +108,30 @@ export const showToast = (options: ToastOptions) => {
   )
 }
 
-export const ToastProvider: React.FC = () => {
+interface ToastProviderProps {
+  children?: React.ReactNode
+}
+
+export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   return (
-    <Toaster
-      position="top-right"
-      reverseOrder={false}
-      containerStyle={{
-        top: 20,
-        right: 20,
-      }}
-      toastOptions={{
-        duration: 4000,
-        style: {
-          background: 'transparent',
-          boxShadow: 'none',
-          padding: 0,
-        },
-      }}
-    />
+    <>
+      {children}
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        containerStyle={{
+          top: 20,
+          right: 20,
+        }}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'transparent',
+            boxShadow: 'none',
+            padding: 0,
+          },
+        }}
+      />
+    </>
   )
 }

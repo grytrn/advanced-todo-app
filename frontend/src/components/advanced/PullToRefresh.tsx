@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, useMotionValue, useTransform } from 'framer-motion'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
@@ -27,7 +27,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (containerRef.current?.scrollTop === 0) {
-      startY.current = e.touches[0].clientY
+      startY.current = e.touches[0]?.clientY || 0
       setIsPulling(true)
     }
   }
@@ -35,7 +35,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isPulling || isRefreshing) return
 
-    const deltaY = e.touches[0].clientY - startY.current
+    const deltaY = (e.touches[0]?.clientY || 0) - (startY.current || 0)
     if (deltaY > 0 && containerRef.current?.scrollTop === 0) {
       currentY.set(Math.min(deltaY * 0.5, threshold * 1.5))
     }

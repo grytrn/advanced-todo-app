@@ -454,7 +454,7 @@ function BulkDueDateDialog({
           {quickDates.map(({ label, value }) => (
             <button
               key={label}
-              onClick={() => setDueDate(value)}
+              onClick={() => setDueDate(value as string)}
               className={cn(
                 "w-full p-2 text-left rounded-lg transition-colors",
                 dueDate === value
@@ -462,7 +462,7 @@ function BulkDueDateDialog({
                   : "hover:bg-gray-100 dark:hover:bg-gray-700"
               )}
             >
-              {label} ({new Date(value).toLocaleDateString()})
+              {label} ({value ? new Date(value).toLocaleDateString() : ''})
             </button>
           ))}
         </div>

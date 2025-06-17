@@ -173,7 +173,7 @@ export function TodosPage() {
           </div>
 
           {/* Productivity Tools */}
-          <FocusMode enabled={focusModeEnabled} onToggle={setFocusModeEnabled} />
+          <FocusMode />
           <PomodoroTimer />
           
           <motion.button
@@ -217,15 +217,12 @@ export function TodosPage() {
 
       {/* Bulk Operations */}
       {selectedTodos.length > 0 && (
-        <BulkOperations 
-          selectedTodos={selectedTodos}
-          onClear={() => setSelectedTodos([])}
-        />
+        <BulkOperations />
       )}
 
       {/* Quick Add Widget */}
       {showQuickAdd && (
-        <QuickAddWidget onClose={() => setShowQuickAdd(false)} />
+        <QuickAddWidget />
       )}
 
       {/* Content based on view type */}
@@ -257,15 +254,15 @@ export function TodosPage() {
       )}
       
       {viewType === 'kanban' && (
-        <KanbanBoard todos={sortedTodos} />
+        <KanbanBoard />
       )}
       
       {viewType === 'calendar' && (
-        <CalendarView todos={sortedTodos} />
+        <CalendarView />
       )}
       
       {viewType === 'timeline' && (
-        <TimelineView todos={sortedTodos} />
+        <TimelineView />
       )}
       
       {sortedTodos.length === 0 && (

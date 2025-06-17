@@ -103,7 +103,7 @@ export const QuickAddWidget: React.FC = () => {
       action: () => {
         const tomorrow = new Date()
         tomorrow.setDate(tomorrow.getDate() + 1)
-        setSelectedDate(tomorrow.toISOString().split('T')[0])
+        setSelectedDate(tomorrow.toISOString().split('T')[0] as string)
       },
       color: 'bg-green-500 hover:bg-green-600',
     },

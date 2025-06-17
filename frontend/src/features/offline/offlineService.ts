@@ -16,7 +16,7 @@ class OfflineService {
         
         // Request background sync permission
         if ('sync' in registration) {
-          await registration.sync.register('sync-queue')
+          await (registration as any).sync.register('sync-queue')
         }
       } catch (error) {
         console.error('Service Worker registration failed:', error)
@@ -136,7 +136,7 @@ class OfflineService {
     // Trigger background sync if available
     if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
       const registration = await navigator.serviceWorker.ready
-      await registration.sync.register('sync-queue')
+      await (registration as any).sync.register('sync-queue')
     }
   }
 

@@ -222,7 +222,7 @@ function evaluateFilter(item: any, filter: SearchFilter): boolean {
     case 'between':
       if (Array.isArray(filterValue) && filterValue.length === 2) {
         const date = new Date(value)
-        return date >= new Date(filterValue[0]) && date <= new Date(filterValue[1])
+        return date >= new Date(filterValue[0] as string) && date <= new Date(filterValue[1] as string)
       }
       return false
     

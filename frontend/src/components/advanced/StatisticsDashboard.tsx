@@ -172,7 +172,7 @@ export const StatisticsDashboard: React.FC = () => {
     }
   }, [todos, categories])
 
-  const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6']
+  // const COLORS = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6']
 
   return (
     <motion.div
@@ -201,7 +201,7 @@ export const StatisticsDashboard: React.FC = () => {
               <div className={clsx('p-2 rounded-lg text-white', stat.color)}>
                 {stat.icon}
               </div>
-              {stat.title === 'Current Streak' && stats.statCards[2].value > 3 && (
+              {stat.title === 'Current Streak' && stats.statCards[2]?.value && Number(stats.statCards[2].value) > 3 && (
                 <TrophyIcon className="w-5 h-5 text-yellow-500" />
               )}
             </div>

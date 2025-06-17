@@ -27,7 +27,7 @@ export function PomodoroTimer() {
   const [timeLeft, setTimeLeft] = useState(0)
   const [showSettings, setShowSettings] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout>()
-  const audioRef = useRef<HTMLAudioElement>()
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
     if (!currentPomodoro) {

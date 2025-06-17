@@ -72,11 +72,11 @@ export const TimelineView: React.FC = () => {
     // Calculate date range
     const minDate = tasksWithDates.reduce((min, task) => 
       task.startDate < min ? task.startDate : min, 
-      tasksWithDates[0].startDate
+      tasksWithDates[0]?.startDate || new Date()
     )
     const maxDate = tasksWithDates.reduce((max, task) => 
       task.endDate > max ? task.endDate : max, 
-      tasksWithDates[0].endDate
+      tasksWithDates[0]?.endDate || new Date()
     )
 
     const startDate = startOfDay(minDate)
@@ -97,7 +97,7 @@ export const TimelineView: React.FC = () => {
     if (dateRange.length === 0) return { left: '0%', width: '100%' }
     
     const totalDays = dateRange.length
-    const startOffset = differenceInDays(task.startDate, dateRange[0])
+    const startOffset = differenceInDays(task.startDate, dateRange[0] || new Date())
     const duration = differenceInDays(task.endDate, task.startDate) + 1
     
     const left = (startOffset / totalDays) * 100
@@ -253,7 +253,7 @@ export const TimelineView: React.FC = () => {
                       <div
                         className="absolute top-0 w-0.5 h-full bg-blue-600 dark:bg-blue-400 z-20"
                         style={{
-                          left: `${(differenceInDays(today, dateRange[0]) / dateRange.length) * 100}%`,
+                          left: `${(differenceInDays(today, dateRange[0] || new Date()) / dateRange.length) * 100}%`,
                         }}
                       />
                     )}

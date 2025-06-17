@@ -57,7 +57,7 @@ export function useWebSocket({ enabled = true, userId }: UseWebSocketOptions = {
 
     socket.on('connect_error', (error) => {
       console.error('WebSocket connection error:', error)
-      showToast('Connection error. Some features may be unavailable.', 'error')
+      showToast({ message: 'Connection error. Some features may be unavailable.', type: 'error' })
     })
 
     // Set up WebSocket handlers for real-time updates
@@ -71,7 +71,7 @@ export function useWebSocket({ enabled = true, userId }: UseWebSocketOptions = {
 
     socket.on('notification', (data: any) => {
       console.log('Notification received:', data)
-      showToast(data.message, data.type || 'info')
+      showToast({ message: data.message, type: data.type || 'info' })
     })
 
     return () => {
