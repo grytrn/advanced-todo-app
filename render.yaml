@@ -13,11 +13,12 @@ services:
           name: todo-app-db
           property: connectionString
       
-      # Redis URL - You'll need to use an external Redis service
-      # Sign up for free at: https://upstash.com/ or https://redis.com/try-free/
+      # Redis
       - key: REDIS_URL
-        value: redis://localhost:6379
-        sync: false
+        fromService:
+          name: todo-app-redis
+          type: redis
+          property: connectionString
       
       # JWT Secrets
       - key: JWT_ACCESS_SECRET
@@ -76,16 +77,13 @@ services:
         value: us-east-1
 
     healthCheckPath: /api/v1/health
-    
-    # Auto-deploy on push to main
     autoDeploy: true
     
-    # Build filters
-    buildFilter:
-      paths:
-        - backend/**
-        - shared/**
-        - package.json
+  # Redis Service
+  - type: redis
+    name: todo-app-redis
+    plan: free
+    ipAllowList: []
 
 databases:
   - name: todo-app-db
@@ -111,5 +109,3 @@ envVarGroups:
         value: your-github-client-secret
       - key: SENTRY_DSN
         value: your-sentry-dsn
-      - key: REDIS_URL
-        value: your-redis-url
