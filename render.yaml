@@ -104,38 +104,28 @@ envVarGroups:
     envVars:
       # Email configuration (required for password reset)
       - key: SMTP_USER
-        value: your-email@gmail.com
         sync: false
       - key: SMTP_PASS
-        value: your-app-password
         sync: false
       
       # OAuth configuration (optional)
       - key: GOOGLE_CLIENT_ID
-        value: your-google-client-id
         sync: false
       - key: GOOGLE_CLIENT_SECRET
-        value: your-google-client-secret
         sync: false
       - key: GITHUB_CLIENT_ID
-        value: your-github-client-id
         sync: false
       - key: GITHUB_CLIENT_SECRET
-        value: your-github-client-secret
         sync: false
       
       # Monitoring (optional)
       - key: SENTRY_DSN
-        value: your-sentry-dsn
         sync: false
       
       # File storage (optional)
       - key: AWS_ACCESS_KEY_ID
-        value: your-aws-key
         sync: false
       - key: AWS_SECRET_ACCESS_KEY
-        value: your-aws-secret
         sync: false
       - key: AWS_S3_BUCKET
-        value: your-bucket-name
         sync: false
