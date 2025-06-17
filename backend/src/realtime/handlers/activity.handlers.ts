@@ -1,5 +1,4 @@
 import { Server, Socket } from 'socket.io';
-import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger';
 import Redis from 'ioredis';
 import { config } from '../../config';
@@ -15,7 +14,6 @@ const logger = createLogger('activity-handlers');
 
 export class ActivityHandlers {
   private redis: Redis;
-  private prisma: PrismaClient;
   private isSubscribed: boolean = false;
   
   constructor(
@@ -23,7 +21,6 @@ export class ActivityHandlers {
     private socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>
   ) {
     this.redis = new Redis(config.redis?.url || 'redis://localhost:6379');
-    this.prisma = new PrismaClient();
   }
   
   register(): void {

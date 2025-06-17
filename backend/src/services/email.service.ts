@@ -16,7 +16,7 @@ export class EmailService {
     this.templatesDir = path.join(process.cwd(), 'src/services/email-templates');
     
     // Configure email transporter
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE, // true for 465, false for other ports
@@ -379,5 +379,39 @@ export class EmailService {
       logger.error({ error }, 'Email service connection failed');
       return false;
     }
+  }
+
+  /**
+   * Send verification email (stub for auth service)
+   */
+  async sendVerificationEmail(email: string, name: string, token: string): Promise<void> {
+    // Using password reset template as a workaround
+    const resetUrl = `${env.FRONTEND_URL}/verify-email?token=${token}`;
+    await this.sendPasswordResetEmail(email, { name, resetUrl });
+  }
+
+  /**
+   * Send suspicious activity email (stub)
+   */
+  async sendSuspiciousActivityEmail(
+    email: string,
+    _name: string,
+    details: {
+      ipAddress: string;
+      userAgent: string;
+      timestamp: Date;
+      reason: string;
+    }
+  ): Promise<void> {
+    logger.info({ email, details }, 'Suspicious activity detected');
+    // TODO: Implement suspicious activity email template
+  }
+
+  /**
+   * Send 2FA enabled email (stub)
+   */
+  async send2FAEnabledEmail(email: string, _name: string, backupCodes: string[]): Promise<void> {
+    logger.info({ email, backupCodes: backupCodes.length }, '2FA enabled');
+    // TODO: Implement 2FA enabled email template
   }
 }

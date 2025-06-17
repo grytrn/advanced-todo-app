@@ -11,7 +11,7 @@ export const authenticateSocket = (app: FastifyInstance) => {
   return async (socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>, next: (err?: Error) => void) => {
     try {
       // Get token from handshake auth or query
-      const token = socket.handshake.auth.token || socket.handshake.query.token;
+      const token = socket.handshake.auth['token'] || socket.handshake.query['token'];
       
       if (!token) {
         logger.warn({ socketId: socket.id }, 'No token provided');
@@ -35,7 +35,7 @@ export const authenticateSocket = (app: FastifyInstance) => {
             id: true,
             email: true,
             name: true,
-            password: true,
+            passwordHash: true,
             createdAt: true,
             updatedAt: true,
           },

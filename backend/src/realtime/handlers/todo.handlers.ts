@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger';
 import { TodoService } from '../../services/todo.service';
-import { Priority } from '@shared/types/todo';
+import { Priority, TodoStatus } from '@shared/types/todo';
 import type { 
   ClientToServerEvents, 
   ServerToClientEvents, 
@@ -51,13 +51,16 @@ export class TodoEventHandlers {
         description: data.content,
         priority: (data.priority?.toUpperCase() as Priority) || Priority.MEDIUM,
         categoryId: data.categoryId,
-        tagNames: data.tagIds, // Assuming tagIds are actually tag names
+        tags: data.tagIds, // Assuming tagIds are actually tag names
         dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
         reminder: data.reminder ? new Date(data.reminder).toISOString() : undefined,
       });
       
       // Emit to all user's connected devices
-      this.io.to(`user:${userId}`).emit('todo:created', todo);
+      this.io.to(`user:${userId}`).emit('todo:created', {
+        ...todo,
+        description: todo.description ?? null,
+      } as any);
       
       // Emit activity
       const activity: ActivityFeedItem = {
@@ -73,9 +76,12 @@ export class TodoEventHandlers {
       this.io.to(`user:${userId}`).emit('activity:feed', activity);
       
       // Inter-server sync
-      this.io.serverSideEmit('todo:sync', userId, todo);
+      this.io.serverSideEmit('todo:sync', userId, todo as any);
       
-      callback({ success: true, data: todo });
+      callback({ success: true, data: {
+        ...todo,
+        description: todo.description ?? null,
+      } });
       
       logger.info({ userId, todoId: todo.id }, 'Todo created via socket');
     } catch (error) {
@@ -101,15 +107,18 @@ export class TodoEventHandlers {
       const todo = await this.todoService.update(userId, data.id, {
         title: data.title,
         description: data.content,
-        status: data.completed ? 'completed' : 'pending',
-        priority: data.priority,
+        status: data.completed ? TodoStatus.COMPLETED : TodoStatus.PENDING,
+        priority: (data.priority?.toUpperCase() as Priority) || undefined,
         categoryId: data.categoryId,
         dueDate: data.dueDate,
         reminder: data.reminder,
       });
       
       // Emit to all user's connected devices
-      this.io.to(`user:${userId}`).emit('todo:updated', todo);
+      this.io.to(`user:${userId}`).emit('todo:updated', {
+        ...todo,
+        description: todo.description ?? null,
+      } as any);
       
       // Emit activity for significant changes
       if (data.completed !== undefined) {
@@ -127,9 +136,12 @@ export class TodoEventHandlers {
       }
       
       // Inter-server sync
-      this.io.serverSideEmit('todo:sync', userId, todo);
+      this.io.serverSideEmit('todo:sync', userId, todo as any);
       
-      callback({ success: true, data: todo });
+      callback({ success: true, data: {
+        ...todo,
+        description: todo.description ?? null,
+      } });
       
       logger.info({ userId, todoId: todo.id }, 'Todo updated via socket');
     } catch (error) {

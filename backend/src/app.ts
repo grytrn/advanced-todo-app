@@ -162,7 +162,7 @@ export const buildApp = async (prisma: PrismaClient): Promise<FastifyInstance> =
     reply.header('X-Response-Time', `${responseTime}ms`);
   });
 
-  return app;
+  return app as any;
 };
 
 // Graceful shutdown handler

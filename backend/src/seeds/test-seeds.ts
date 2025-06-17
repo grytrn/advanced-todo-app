@@ -14,6 +14,7 @@ interface SeedTodo {
   description?: string;
   priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'in_progress' | 'completed';
+  position: number;
   dueDate?: Date;
   tags: string[];
 }
@@ -51,8 +52,9 @@ const generateTodos = (count: number): SeedTodo[] => {
     todos.push({
       title: `Test Todo ${i + 1}`,
       description: i % 2 === 0 ? `Description for todo ${i + 1}` : undefined,
-      priority,
-      status,
+      priority: priority!,
+      status: status!,
+      position: i,
       dueDate: i % 3 === 0 ? new Date(Date.now() + (i * 24 * 60 * 60 * 1000)) : undefined,
       tags: selectedTags,
     });
@@ -79,7 +81,7 @@ async function seedTestData() {
       const user = await prisma.user.create({
         data: {
           email: userData.email,
-          password: hashedPassword,
+          passwordHash: hashedPassword,
           name: userData.name,
         },
       });
@@ -97,12 +99,18 @@ async function seedTestData() {
       for (const todoData of todos) {
         await prisma.todo.create({
           data: {
-            ...todoData,
+            title: todoData.title,
+            description: todoData.description,
+            priority: todoData.priority.toUpperCase(),
+            status: todoData.status.toUpperCase(),
+            position: todoData.position,
+            dueDate: todoData.dueDate,
             userId: user.id,
             completedAt: todoData.status === 'completed' 
               ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
               : null,
-          },
+            tags: todoData.tags,
+          } as any,
         });
       }
 

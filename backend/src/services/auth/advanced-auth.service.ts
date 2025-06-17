@@ -2,8 +2,9 @@ import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 import { FastifyInstance } from 'fastify';
 import { config } from '../../config';
+import { env } from '../../config/env';
 import { createLogger } from '../../utils/logger';
-import { emailService } from '../email.service';
+import { EmailService } from '../email.service';
 import { 
   ConflictError, 
   UnauthorizedError, 
@@ -33,10 +34,14 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
 export class AdvancedAuthService {
+  private emailService: EmailService;
+
   constructor(
     private prisma: PrismaClient,
     private app: FastifyInstance
-  ) {}
+  ) {
+    this.emailService = new EmailService();
+  }
 
   /**
    * Register a new user with email verification
@@ -89,7 +94,7 @@ export class AdvancedAuthService {
     });
 
     // Send verification email
-    await emailService.sendVerificationEmail(email, name, token);
+    await this.emailService.sendVerificationEmail(email, name, token);
 
     // Log audit event
     await this.createAuditLog(user.id, 'user.register', 'user', user.id);
@@ -97,7 +102,11 @@ export class AdvancedAuthService {
     logger.info({ userId: user.id, email: user.email }, 'User registered successfully');
 
     return {
-      user,
+      user: {
+        ...user,
+        avatar: user.avatar ?? undefined,
+        bio: user.bio ?? undefined,
+      } as User,
       message: 'Registration successful. Please check your email to verify your account.',
     };
   }
@@ -167,7 +176,7 @@ export class AdvancedAuthService {
     });
 
     // Send verification email
-    await emailService.sendVerificationEmail(email, user.name, token);
+    await this.emailService.sendVerificationEmail(email, user.name, token);
 
     logger.info({ userId: user.id }, 'Verification email resent');
 
@@ -220,12 +229,15 @@ export class AdvancedAuthService {
         updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION);
         
         // Send suspicious activity email
-        await emailService.sendSuspiciousActivityEmail(
+        await this.emailService.sendSuspiciousActivityEmail(
           email,
           userWithPassword.name,
-          'Multiple failed login attempts',
-          ipAddress,
-          userAgent
+          {
+            ipAddress: ipAddress || 'unknown',
+            userAgent: userAgent || 'unknown',
+            timestamp: new Date(),
+            reason: 'Multiple failed login attempts',
+          }
         );
       }
 
@@ -242,7 +254,11 @@ export class AdvancedAuthService {
       // Return partial response for 2FA flow
       const { passwordHash, twoFactorSecret, backupCodes, ...user } = userWithPassword;
       return {
-        user,
+        user: {
+          ...user,
+          avatar: user.avatar ?? undefined,
+          bio: user.bio ?? undefined,
+        } as User,
         accessToken: '', // Will be provided after 2FA verification
         refreshToken: '',
         requiresTwoFactor: true,
@@ -271,7 +287,7 @@ export class AdvancedAuthService {
         refreshToken,
         userAgent,
         ipAddress,
-        expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn)),
+        expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn || '7d')),
       },
     });
 
@@ -290,7 +306,7 @@ export class AdvancedAuthService {
     logger.info({ userId: user.id, email: user.email }, 'User logged in successfully');
 
     return {
-      user,
+      user: { ...user, avatar: user.avatar || undefined } as User,
       accessToken,
       refreshToken,
     };
@@ -367,7 +383,7 @@ export class AdvancedAuthService {
         refreshToken,
         userAgent,
         ipAddress,
-        expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn)),
+        expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn || '7d')),
       },
     });
 
@@ -384,7 +400,7 @@ export class AdvancedAuthService {
     const { passwordHash, twoFactorSecret, backupCodes, ...user } = userWithSecret;
 
     return {
-      user,
+      user: { ...user, avatar: user.avatar || undefined } as User,
       accessToken,
       refreshToken,
     };
@@ -416,7 +432,8 @@ export class AdvancedAuthService {
     });
 
     // Send reset email
-    await emailService.sendPasswordResetEmail(email, user.name, token);
+    const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${token}`;
+    await this.emailService.sendPasswordResetEmail(email, { name: user.name, resetUrl });
 
     // Log audit event
     await this.createAuditLog(user.id, 'user.request_password_reset', 'user', user.id);
@@ -542,7 +559,7 @@ export class AdvancedAuthService {
     });
 
     // Send confirmation email with backup codes
-    await emailService.send2FAEnabledEmail(user.email, user.name, user.backupCodes);
+    await this.emailService.send2FAEnabledEmail(user.email, user.name, user.backupCodes);
 
     // Log audit event
     await this.createAuditLog(userId, 'user.enable_2fa_confirmed', 'user', userId);
@@ -754,7 +771,6 @@ export class AdvancedAuthService {
     };
 
     const refreshToken = this.app.jwt.sign(refreshTokenPayload, {
-      secret: config.auth.refresh.secret,
       expiresIn: config.auth.refresh.expiresIn,
     });
 
@@ -770,8 +786,8 @@ export class AdvancedAuthService {
       throw new ValidationError('Invalid time string format');
     }
 
-    const [, value, unit] = match;
-    const num = parseInt(value, 10);
+    const [, value, unit] = match!;
+    const num = parseInt(value!, 10);
 
     switch (unit) {
       case 's': return num * 1000;

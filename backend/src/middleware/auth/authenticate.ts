@@ -21,7 +21,7 @@ export interface AuthenticatedRequest extends FastifyRequest {
  */
 export async function authenticate(
   request: FastifyRequest,
-  reply: FastifyReply
+  _reply: FastifyReply
 ): Promise<void> {
   try {
     // Check for API key first
@@ -120,7 +120,7 @@ async function authenticateWithApiKey(
  * Require specific roles
  */
 export function requireRoles(...requiredRoles: string[]) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     const authRequest = request as AuthenticatedRequest;
     
     // Check if user has any of the required roles
@@ -136,7 +136,7 @@ export function requireRoles(...requiredRoles: string[]) {
  * Require specific permissions
  */
 export function requirePermissions(...requiredPermissions: string[]) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     const authRequest = request as AuthenticatedRequest;
     
     // Check if user has all required permissions
@@ -155,7 +155,7 @@ export function requirePermissions(...requiredPermissions: string[]) {
  */
 export async function requireVerifiedEmail(
   request: FastifyRequest,
-  reply: FastifyReply
+  _reply: FastifyReply
 ): Promise<void> {
   const authRequest = request as AuthenticatedRequest;
   
@@ -176,7 +176,7 @@ export function rateLimitByTier(
   defaultLimit: number,
   tierLimits: Record<string, number>
 ) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     const authRequest = request as AuthenticatedRequest;
     
     // Determine rate limit based on user roles

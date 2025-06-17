@@ -16,6 +16,7 @@ import type {
   UpdateExportScheduleRequest,
   CreateExportTemplateRequest,
   UpdateExportTemplateRequest,
+  EmailDeliveryOptions,
 } from '@shared/types/export';
 import { ExportFormat, ExportStatus } from '@shared/types/export';
 import type { TodoListRequest } from '@shared/types/todo';
@@ -34,12 +35,12 @@ export class ExportService {
   private exportQueue: Queue<ExportJobData>;
   private todoService: TodoService;
   private emailService: EmailService;
-  private exportDir: string;
+  // private exportDir: string; // Unused variable
 
   constructor(private prisma: PrismaClient) {
     this.todoService = new TodoService(prisma);
     this.emailService = new EmailService();
-    this.exportDir = path.join(process.cwd(), 'exports');
+    // this.exportDir = path.join(process.cwd(), 'exports'); // Unused
     
     // Initialize Bull queue
     this.exportQueue = new Bull('export-queue', {
@@ -69,7 +70,7 @@ export class ExportService {
         userId,
         format: request.format,
         status: ExportStatus.PENDING,
-        options: request.options || {},
+        options: JSON.parse(JSON.stringify(request.options || {})),
       },
     });
 
@@ -78,7 +79,7 @@ export class ExportService {
       jobId: job.id,
       userId,
       format: request.format,
-      options: request.options || {},
+      options: (request.options || {}) as ExportOptions,
       sendEmail: request.sendEmail || false,
       emailRecipients: request.emailRecipients || [],
     });
@@ -106,7 +107,11 @@ export class ExportService {
       throw new NotFoundError('Export job not found');
     }
 
-    return job as ExportJob;
+    return {
+      ...job,
+      options: job.options as unknown as ExportOptions,
+      emailDelivery: job.emailDelivery as unknown as EmailDeliveryOptions | undefined,
+    } as ExportJob;
   }
 
   /**
@@ -141,7 +146,11 @@ export class ExportService {
     ]);
 
     return {
-      items: jobs as ExportJob[],
+      items: jobs.map(job => ({
+        ...job,
+        options: job.options as unknown as ExportOptions,
+        emailDelivery: job.emailDelivery as unknown as EmailDeliveryOptions | undefined,
+      })) as ExportJob[],
       pagination: {
         page,
         limit,
@@ -351,8 +360,8 @@ export class ExportService {
         name: request.name,
         frequency: request.frequency,
         format: request.format,
-        options: request.options,
-        emailDelivery: request.emailDelivery || { enabled: false, recipients: [] },
+        options: request.options as any,
+        emailDelivery: (request.emailDelivery || { enabled: false, recipients: [] }) as any,
         nextRunAt,
         isActive: true,
       },
@@ -360,7 +369,11 @@ export class ExportService {
 
     logger.info({ scheduleId: schedule.id, userId }, 'Export schedule created');
 
-    return schedule as ExportSchedule;
+    return {
+      ...schedule,
+      options: schedule.options as unknown as ExportOptions,
+      emailDelivery: schedule.emailDelivery as unknown as EmailDeliveryOptions,
+    } as ExportSchedule;
   }
 
   /**
@@ -395,7 +408,11 @@ export class ExportService {
 
     logger.info({ scheduleId, userId }, 'Export schedule updated');
 
-    return updated as ExportSchedule;
+    return {
+      ...updated,
+      options: updated.options as unknown as ExportOptions,
+      emailDelivery: updated.emailDelivery as unknown as EmailDeliveryOptions,
+    } as ExportSchedule;
   }
 
   /**
@@ -429,7 +446,11 @@ export class ExportService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return schedules as ExportSchedule[];
+    return schedules.map(schedule => ({
+      ...schedule,
+      options: schedule.options as unknown as ExportOptions,
+      emailDelivery: schedule.emailDelivery as unknown as EmailDeliveryOptions,
+    })) as ExportSchedule[];
   }
 
   /**
@@ -582,7 +603,9 @@ export class ExportService {
     let match;
 
     while ((match = regex.exec(content)) !== null) {
-      variables.add(match[1].trim());
+      if (match[1]) {
+        variables.add(match[1].trim());
+      }
     }
 
     return Array.from(variables);

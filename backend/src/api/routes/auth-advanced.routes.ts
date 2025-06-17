@@ -10,6 +10,7 @@ import {
   auditAction,
   type AuthenticatedRequest 
 } from '../../middleware/auth';
+import type { RegisterRequest } from '@shared/types/auth';
 import { generateCSRFToken } from '../../middleware/auth/csrf';
 
 // Validation schemas
@@ -82,7 +83,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
       body: registerSchema,
     },
   }, async (request, reply) => {
-    const result = await authService.register(request.body);
+    const result = await authService.register(request.body as RegisterRequest);
     return reply.status(201).send({
       success: true,
       data: result,
@@ -113,7 +114,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
       }),
     },
   }, async (request, reply) => {
-    const result = await authService.resendVerificationEmail(request.body.email);
+    const result = await authService.resendVerificationEmail((request.body as { email: string }).email);
     return reply.send({
       success: true,
       data: result,

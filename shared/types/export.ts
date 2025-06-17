@@ -74,6 +74,7 @@ export interface ExportJob {
   format: ExportFormat;
   status: ExportStatus;
   options: ExportOptions;
+  emailDelivery?: EmailDeliveryOptions;
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
@@ -86,6 +87,13 @@ export interface ExportJob {
   updatedAt: Date;
 }
 
+export interface EmailDeliveryOptions {
+  enabled: boolean;
+  recipients: string[];
+  subject?: string;
+  message?: string;
+}
+
 export interface ExportSchedule {
   id: string;
   userId: string;
@@ -93,12 +101,7 @@ export interface ExportSchedule {
   frequency: ExportFrequency;
   format: ExportFormat;
   options: ExportOptions;
-  emailDelivery?: {
-    enabled: boolean;
-    recipients: string[];
-    subject?: string;
-    message?: string;
-  };
+  emailDelivery?: EmailDeliveryOptions;
   nextRunAt: Date;
   lastRunAt?: Date;
   isActive: boolean;

@@ -320,6 +320,7 @@ model ExportJob {
   format      String    // PDF, CSV, JSON, MARKDOWN, ICAL
   status      String    // PENDING, PROCESSING, COMPLETED, FAILED, EXPIRED
   options     Json      // Export options
+  emailDelivery Json?   // Email delivery options
   fileUrl     String?   // Path to generated file
   fileName    String?
   fileSize    Int?      // File size in bytes

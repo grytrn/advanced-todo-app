@@ -64,7 +64,11 @@ export class AuthService {
 
     logger.info({ userId: user.id, email: user.email }, 'User registered successfully');
 
-    return user;
+    return {
+      ...user,
+      avatar: user.avatar ?? undefined,
+      bio: user.bio ?? undefined,
+    } as User;
   }
 
   /**
@@ -104,7 +108,7 @@ export class AuthService {
         id: sessionId,
         userId: userWithPassword.id,
         refreshToken,
-        expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn)),
+        expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn || '7d')),
         ipAddress: '', // Would need to get from request
         userAgent: '', // Would need to get from request
       },
@@ -116,7 +120,11 @@ export class AuthService {
     logger.info({ userId: user.id, email: user.email }, 'User logged in successfully');
 
     return {
-      user,
+      user: {
+        ...user,
+        avatar: user.avatar ?? undefined,
+        bio: user.bio ?? undefined,
+      } as User,
       accessToken,
       refreshToken,
     };
@@ -131,9 +139,7 @@ export class AuthService {
   }> {
     try {
       // Verify refresh token
-      const payload = this.app.jwt.verify(refreshToken, {
-        secret: config.auth.refresh.secret,
-      }) as RefreshTokenPayload;
+      const payload = this.app.jwt.verify(refreshToken) as RefreshTokenPayload;
 
       if (payload.type !== 'refresh') {
         throw new UnauthorizedError('Invalid token type');
@@ -170,7 +176,7 @@ export class AuthService {
         where: { id: session.id },
         data: {
           refreshToken: tokens.refreshToken,
-          expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn)),
+          expiresAt: new Date(Date.now() + this.parseTimeString(config.auth.refresh.expiresIn || '7d')),
         },
       });
 
@@ -194,9 +200,7 @@ export class AuthService {
   async logout(refreshToken: string): Promise<void> {
     try {
       // Verify refresh token
-      const payload = this.app.jwt.verify(refreshToken, {
-        secret: config.auth.refresh.secret,
-      }) as RefreshTokenPayload;
+      const payload = this.app.jwt.verify(refreshToken) as RefreshTokenPayload;
 
       // Delete session
       await this.prisma.session.delete({
@@ -237,7 +241,11 @@ export class AuthService {
       throw new UnauthorizedError('Account deactivated');
     }
 
-    return user;
+    return {
+      ...user,
+      avatar: user.avatar ?? undefined,
+      bio: user.bio ?? undefined,
+    } as User;
   }
 
   /**
@@ -278,7 +286,6 @@ export class AuthService {
     };
 
     const refreshToken = this.app.jwt.sign(refreshTokenPayload, {
-      secret: config.auth.refresh.secret,
       expiresIn: config.auth.refresh.expiresIn,
     });
 
@@ -295,7 +302,7 @@ export class AuthService {
     }
 
     const [, value, unit] = match;
-    const num = parseInt(value, 10);
+    const num = parseInt(value!, 10);
 
     switch (unit) {
       case 's': return num * 1000;

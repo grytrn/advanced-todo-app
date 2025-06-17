@@ -55,7 +55,7 @@ export class NotificationHandlers {
             gte: now,
             lte: fiveMinutesFromNow,
           },
-          completed: false,
+          completedAt: null,
         },
       });
       
@@ -140,7 +140,7 @@ export class NotificationHandlers {
   
   cleanup(): void {
     if (this.reminderCheckInterval) {
-      clearInterval(this.reminderCheckInterval);
+      clearInterval(this.reminderCheckInterval as any);
     }
   }
 }

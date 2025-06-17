@@ -83,7 +83,7 @@ export class OAuthService {
   async handleCallback(
     provider: string,
     code: string,
-    state: string
+    _state: string
   ): Promise<{
     user: User;
     accessToken: string;
@@ -158,6 +158,9 @@ export class OAuthService {
   ): Promise<any> {
     const providerConfig = OAUTH_PROVIDERS[provider as keyof typeof OAUTH_PROVIDERS];
     const config = this.configs[provider];
+    if (!config) {
+      throw new ValidationError(`OAuth provider ${provider} not configured`);
+    }
 
     const params = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -215,7 +218,7 @@ export class OAuthService {
       
       if (!email) {
         // Get primary email from emails endpoint
-        const emailsResponse = await axios.get(providerConfig.emailUrl!, {
+        const emailsResponse = await axios.get((providerConfig as any).emailUrl, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/vnd.github.v3+json',
@@ -285,7 +288,7 @@ export class OAuthService {
       });
 
       const { passwordHash, twoFactorSecret, backupCodes, ...user } = existingOAuth.user;
-      return { user, isNewUser: false };
+      return { user: { ...user, avatar: user.avatar || undefined } as User, isNewUser: false };
     }
 
     // Check if user with email exists
@@ -326,7 +329,7 @@ export class OAuthService {
       });
 
       const { passwordHash, twoFactorSecret, backupCodes, ...user } = existingUser;
-      return { user, isNewUser: false };
+      return { user: { ...user, avatar: user.avatar || undefined } as User, isNewUser: false };
     }
 
     // Create new user
@@ -370,7 +373,7 @@ export class OAuthService {
       },
     });
 
-    return { user: newUser, isNewUser: true };
+    return { user: { ...newUser, avatar: newUser.avatar || undefined } as User, isNewUser: true };
   }
 
   /**
@@ -474,7 +477,6 @@ export class OAuthService {
     };
 
     const refreshToken = this.app.jwt.sign(refreshTokenPayload, {
-      secret: process.env.REFRESH_TOKEN_SECRET!,
       expiresIn: '7d',
     });
 

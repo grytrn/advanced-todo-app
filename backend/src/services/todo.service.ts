@@ -104,16 +104,7 @@ export class TodoService {
     const todo = await this.prisma.todo.findFirst({
       where: {
         id: todoId,
-        OR: [
-          { userId },
-          {
-            shares: {
-              some: {
-                userId,
-              },
-            },
-          },
-        ],
+        userId,
       },
       include: {
         user: {
@@ -187,7 +178,7 @@ export class TodoService {
       reminder: data.reminder !== undefined ? (data.reminder ? new Date(data.reminder) : null) : undefined,
       priority: data.priority,
       status: data.status,
-      categoryId: data.categoryId,
+      category: data.categoryId ? { connect: { id: data.categoryId } } : undefined,
       position: data.position,
       isRecurring: data.isRecurring,
       recurrence: data.recurrence,

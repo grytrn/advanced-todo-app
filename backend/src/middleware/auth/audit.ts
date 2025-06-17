@@ -34,21 +34,21 @@ function extractResourceInfo(request: FastifyRequest): {
   if (urlParts.includes('todos') && urlParts.length > urlParts.indexOf('todos') + 1) {
     return {
       resource: 'todo',
-      resourceId: urlParts[urlParts.indexOf('todos') + 1].split('?')[0],
+      resourceId: urlParts[urlParts.indexOf('todos') + 1]?.split('?')[0] || '',
     };
   }
   
   if (urlParts.includes('categories') && urlParts.length > urlParts.indexOf('categories') + 1) {
     return {
       resource: 'category',
-      resourceId: urlParts[urlParts.indexOf('categories') + 1].split('?')[0],
+      resourceId: urlParts[urlParts.indexOf('categories') + 1]?.split('?')[0] || '',
     };
   }
   
   if (urlParts.includes('users') && urlParts.length > urlParts.indexOf('users') + 1) {
     return {
       resource: 'user',
-      resourceId: urlParts[urlParts.indexOf('users') + 1].split('?')[0],
+      resourceId: urlParts[urlParts.indexOf('users') + 1]?.split('?')[0] || '',
     };
   }
   
@@ -207,8 +207,8 @@ export async function logAuditEvent(
 /**
  * Audit log middleware for specific routes
  */
-export function auditAction(action: string, resourceExtractor?: (req: FastifyRequest) => AuditContext) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+export function auditAction(action: string, resourceExtractor?: (req: FastifyRequest) => Partial<AuditContext>) {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     const authRequest = request as AuthenticatedRequest;
     
     // Extract context
@@ -216,9 +216,10 @@ export function auditAction(action: string, resourceExtractor?: (req: FastifyReq
     
     // Log the action
     await logAuditEvent(authRequest.userId, action, {
+      action,
       ...context,
       details: {
-        ...context.details,
+        ...(context as any).details,
         method: request.method,
         path: request.url,
         ip: request.ip,

@@ -63,7 +63,7 @@ socket.on('todo:updated', (todo) => {
   console.log('✏️  Todo updated:', {
     id: todo.id,
     title: todo.title,
-    completed: todo.completed
+    completed: todo.completedAt !== null
   });
 });
 
@@ -219,7 +219,7 @@ function showMenu() {
             '4': 'offline'
           };
           socket.emit('presence:update', {
-            status: statusMap[status] || 'online',
+            status: (statusMap[status] || 'online') as 'online' | 'away' | 'busy' | 'offline',
             lastActivity: new Date()
           });
           console.log('✅ Presence updated');

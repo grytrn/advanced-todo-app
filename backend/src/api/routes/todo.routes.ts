@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { TodoService } from '../../services/todo.service';
+import type { CreateTodoRequest, UpdateTodoRequest } from '@shared/types/todo';
 // Prisma will be accessed via app.prisma
 import {
   createTodoSchema,
@@ -53,7 +54,11 @@ const todoRoutes: FastifyPluginAsync = async (app) => {
       },
     },
   }, async (request, reply) => {
-    const todo = await todoService.create(request.userId!, request.body);
+    const todo = await todoService.create(request.userId!, {
+      ...request.body,
+      dueDate: request.body.dueDate ? request.body.dueDate.toISOString() : undefined,
+      reminder: request.body.reminder ? request.body.reminder.toISOString() : undefined,
+    } as CreateTodoRequest);
     return reply.status(201).send({
       success: true,
       data: { todo },
@@ -157,7 +162,12 @@ const todoRoutes: FastifyPluginAsync = async (app) => {
     const todo = await todoService.update(
       request.userId!,
       request.params.id,
-      request.body
+      {
+        ...request.body,
+        description: request.body.description === null ? undefined : request.body.description,
+        dueDate: request.body.dueDate ? request.body.dueDate.toISOString() : undefined,
+        reminder: request.body.reminder ? request.body.reminder.toISOString() : undefined,
+      } as UpdateTodoRequest
     );
     return reply.send({
       success: true,

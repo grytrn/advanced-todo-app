@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import handlebars from 'handlebars';
-import { ExportOptions, ExportFormat } from '@shared/types/export';
+import { ExportOptions } from '@shared/types/export';
 import { Todo, Priority, TodoStatus } from '@shared/types/todo';
 import { createLogger } from '../../../utils/logger';
 
@@ -127,15 +127,15 @@ export class PdfExportGenerator {
       // By category
       const categoryName = todo.category?.name || 'Uncategorized';
       if (!byCategory[categoryName]) byCategory[categoryName] = [];
-      byCategory[categoryName].push(todo);
+      byCategory[categoryName]!.push(todo);
 
       // By priority
       if (!byPriority[todo.priority]) byPriority[todo.priority] = [];
-      byPriority[todo.priority].push(todo);
+      byPriority[todo.priority]!.push(todo);
 
       // By status
       if (!byStatus[todo.status]) byStatus[todo.status] = [];
-      byStatus[todo.status].push(todo);
+      byStatus[todo.status]!.push(todo);
     });
 
     return { byCategory, byPriority, byStatus };

@@ -124,8 +124,8 @@ export class ScheduledExportProcessor {
         {
           format: schedule.format as any,
           options: schedule.options as any,
-          sendEmail: schedule.emailDelivery?.enabled || false,
-          emailRecipients: schedule.emailDelivery?.recipients || [],
+          sendEmail: (schedule.emailDelivery as any)?.enabled || false,
+          emailRecipients: (schedule.emailDelivery as any)?.recipients || [],
         }
       );
 
@@ -139,7 +139,7 @@ export class ScheduledExportProcessor {
       });
 
       // If email delivery is enabled, wait for job completion and send summary
-      if (schedule.emailDelivery?.enabled && schedule.emailDelivery?.recipients?.length > 0) {
+      if ((schedule.emailDelivery as any)?.enabled && (schedule.emailDelivery as any)?.recipients?.length > 0) {
         await this.waitForJobAndSendSummary(jobId, schedule);
       }
 
@@ -171,16 +171,17 @@ export class ScheduledExportProcessor {
         const summary = await this.calculateExportSummary(schedule.userId);
 
         // Send email with summary
+        const emailDelivery = schedule.emailDelivery as any;
         await this.exportService['emailService'].sendScheduledExportEmail(
-          schedule.emailDelivery.recipients,
+          emailDelivery.recipients,
           {
             scheduleName: schedule.name,
             format: schedule.format,
             fileName: job.fileName!,
             downloadUrl: `${env.APP_URL}/api/v1/exports/${jobId}/download`,
             summary,
-            subject: schedule.emailDelivery.subject,
-            message: schedule.emailDelivery.message,
+            subject: emailDelivery.subject,
+            message: emailDelivery.message,
           }
         );
 

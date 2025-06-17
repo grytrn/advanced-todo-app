@@ -21,7 +21,7 @@ const main = async () => {
     logger.info('Database connected successfully');
     
     // Run migrations in production
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env['NODE_ENV'] === 'production') {
       try {
         const { execSync } = require('child_process');
         logger.info('Running database migrations...');

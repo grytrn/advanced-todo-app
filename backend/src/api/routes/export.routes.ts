@@ -1,6 +1,15 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ExportController } from '../controllers/export.controller';
 import { ExportService } from '../../services/export/export.service';
+import type {
+  CreateExportRequest,
+  ListExportJobsRequest,
+  CreateExportScheduleRequest,
+  UpdateExportScheduleRequest,
+  CreateExportTemplateRequest,
+  UpdateExportTemplateRequest,
+  ListExportTemplatesRequest,
+} from '@shared/types/export';
 // Prisma will be accessed via app.prisma
 import {
   createExportSchema,
@@ -25,7 +34,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.addHook('onRequest', fastify.authenticate);
 
   // Export jobs
-  fastify.post(
+  fastify.post<{ Body: CreateExportRequest }>(
     '/',
     {
       schema: createExportSchema,
@@ -33,7 +42,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.createExport(request, reply)
   );
 
-  fastify.get(
+  fastify.get<{ Querystring: ListExportJobsRequest }>(
     '/',
     {
       schema: listExportJobsSchema,
@@ -41,7 +50,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.listExportJobs(request, reply)
   );
 
-  fastify.get(
+  fastify.get<{ Params: { jobId: string } }>(
     '/:jobId',
     {
       schema: getExportJobSchema,
@@ -49,7 +58,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.getExportJob(request, reply)
   );
 
-  fastify.get(
+  fastify.get<{ Params: { jobId: string } }>(
     '/:jobId/download',
     {
       schema: downloadExportSchema,
@@ -57,13 +66,13 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.downloadExport(request, reply)
   );
 
-  fastify.get(
+  fastify.get<{ Params: { jobId: string } }>(
     '/:jobId/progress',
     (request, reply) => exportController.getExportProgress(request, reply)
   );
 
   // Export schedules
-  fastify.post(
+  fastify.post<{ Body: CreateExportScheduleRequest }>(
     '/schedules',
     {
       schema: createExportScheduleSchema,
@@ -79,7 +88,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.listExportSchedules(request, reply)
   );
 
-  fastify.patch(
+  fastify.patch<{ Params: { scheduleId: string }; Body: UpdateExportScheduleRequest }>(
     '/schedules/:scheduleId',
     {
       schema: updateExportScheduleSchema,
@@ -87,7 +96,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.updateExportSchedule(request, reply)
   );
 
-  fastify.delete(
+  fastify.delete<{ Params: { scheduleId: string } }>(
     '/schedules/:scheduleId',
     {
       schema: deleteExportScheduleSchema,
@@ -96,7 +105,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
   );
 
   // Export templates
-  fastify.post(
+  fastify.post<{ Body: CreateExportTemplateRequest }>(
     '/templates',
     {
       schema: createExportTemplateSchema,
@@ -104,7 +113,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.createExportTemplate(request, reply)
   );
 
-  fastify.get(
+  fastify.get<{ Querystring: ListExportTemplatesRequest }>(
     '/templates',
     {
       schema: listExportTemplatesSchema,
@@ -112,7 +121,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.listExportTemplates(request, reply)
   );
 
-  fastify.patch(
+  fastify.patch<{ Params: { templateId: string }; Body: UpdateExportTemplateRequest }>(
     '/templates/:templateId',
     {
       schema: updateExportTemplateSchema,
@@ -120,7 +129,7 @@ const exportRoutes: FastifyPluginAsync = async (fastify) => {
     (request, reply) => exportController.updateExportTemplate(request, reply)
   );
 
-  fastify.delete(
+  fastify.delete<{ Params: { templateId: string } }>(
     '/templates/:templateId',
     {
       schema: deleteExportTemplateSchema,

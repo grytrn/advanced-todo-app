@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
-import { randomBytes, createHash } from 'crypto';
+import { randomBytes } from 'crypto';
 import { ForbiddenError } from '../../utils/errors';
 import { createLogger } from '../../utils/logger';
 
@@ -26,14 +26,6 @@ export function generateCSRFToken(): string {
   return randomBytes(CSRF_TOKEN_LENGTH).toString('hex');
 }
 
-/**
- * Hash CSRF token for comparison
- */
-function hashCSRFToken(token: string, sessionId: string): string {
-  return createHash('sha256')
-    .update(token + sessionId)
-    .digest('hex');
-}
 
 /**
  * CSRF protection plugin
@@ -47,32 +39,32 @@ export async function csrfProtection(
     headerName = CSRF_HEADER,
     sessionKey = 'csrfSecret',
     skipRoutes = [],
-    secure = process.env.NODE_ENV === 'production',
+    secure = process.env['NODE_ENV'] === 'production',
     sameSite = 'strict',
   } = options;
 
   // Add CSRF token generation route
-  app.get('/api/v1/auth/csrf-token', async (request, reply) => {
+  app.get('/api/v1/auth/csrf-token', async (request, _reply) => {
     const token = generateCSRFToken();
     
     // Store token in session
-    if (request.session) {
-      request.session[sessionKey] = token;
+    if ((request as any).session) {
+      (request as any).session[sessionKey] = token;
     }
 
     // Set cookie
-    reply.setCookie(cookieName, token, {
+    _reply.setCookie(cookieName, token, {
       httpOnly: false, // Must be accessible by JavaScript
       secure,
       sameSite,
       path: '/',
     });
 
-    return { csrfToken: token };
+    return _reply.send({ csrfToken: token });
   });
 
   // Add CSRF validation hook
-  app.addHook('preHandler', async (request, reply) => {
+  app.addHook('preHandler', async (request, _reply) => {
     // Skip CSRF check for safe methods
     if (SAFE_METHODS.includes(request.method)) {
       return;
@@ -84,7 +76,8 @@ export async function csrfProtection(
     }
 
     // Skip if no session (unauthenticated requests)
-    if (!request.session || !request.session[sessionKey]) {
+    const requestWithSession = request as any;
+    if (!requestWithSession.session || !requestWithSession.session[sessionKey]) {
       return;
     }
 
@@ -104,7 +97,7 @@ export async function csrfProtection(
     }
 
     // Validate token
-    const sessionToken = request.session[sessionKey];
+    const sessionToken = (request as any).session[sessionKey];
     
     if (token !== sessionToken) {
       logger.warn({ 
@@ -127,7 +120,7 @@ export function requireCSRFToken(options: CSRFOptions = {}) {
     sessionKey = 'csrfSecret',
   } = options;
 
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     // Skip CSRF check for safe methods
     if (SAFE_METHODS.includes(request.method)) {
       return;
@@ -143,8 +136,8 @@ export function requireCSRFToken(options: CSRFOptions = {}) {
     }
 
     // Validate token against session
-    if (request.session && request.session[sessionKey]) {
-      const sessionToken = request.session[sessionKey];
+    if ((request as any).session && (request as any).session[sessionKey]) {
+      const sessionToken = (request as any).session[sessionKey];
       
       if (token !== sessionToken) {
         throw new ForbiddenError('Invalid CSRF token');
@@ -166,7 +159,7 @@ export function doubleSubmitCSRF(options: CSRFOptions = {}) {
     headerName = CSRF_HEADER,
   } = options;
 
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     // Skip CSRF check for safe methods
     if (SAFE_METHODS.includes(request.method)) {
       return;

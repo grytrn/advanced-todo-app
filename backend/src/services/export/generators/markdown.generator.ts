@@ -164,7 +164,7 @@ export class MarkdownExportGenerator {
       if (!groups[groupKey]) {
         groups[groupKey] = [];
       }
-      groups[groupKey].push(todo);
+      groups[groupKey]!.push(todo);
     });
 
     // Sort groups
@@ -182,7 +182,7 @@ export class MarkdownExportGenerator {
 
     const sortedGroups: Record<string, Todo[]> = {};
     sortedKeys.forEach(key => {
-      sortedGroups[key] = groups[key];
+      sortedGroups[key] = groups[key] || [];
     });
 
     return sortedGroups;

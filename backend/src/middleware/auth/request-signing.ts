@@ -48,7 +48,7 @@ export function requireRequestSignature(options: SignatureOptions) {
     includeQuery = true,
   } = options;
 
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     const signature = request.headers[header] as string;
     const timestamp = request.headers['x-timestamp'] as string;
 
@@ -93,7 +93,7 @@ export function requireRequestSignature(options: SignatureOptions) {
     }
 
     // Generate expected signature
-    const path = includeQuery ? request.url : request.url.split('?')[0];
+    const path = includeQuery ? request.url : request.url.split('?')[0] || '';
     const expectedSignature = generateRequestSignature(
       request.method,
       path,
@@ -172,7 +172,7 @@ export function requireWebhookSignature(options: {
     algorithm = 'sha256',
   } = options;
 
-  return async (request: FastifyRequest, reply: FastifyReply) => {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
     const signature = request.headers[header] as string;
 
     if (!signature) {
@@ -186,7 +186,7 @@ export function requireWebhookSignature(options: {
     }
 
     // Get raw body for signature verification
-    const payload = request.rawBody || JSON.stringify(request.body);
+    const payload = (request as any).rawBody || JSON.stringify(request.body);
 
     if (!verifyWebhookSignature(payload, signature, secret, algorithm)) {
       logger.warn({ 
