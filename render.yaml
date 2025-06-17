@@ -32,29 +32,15 @@ services:
       - key: PORT
         value: 8000
       - key: FRONTEND_URL
-        value: https://your-frontend.vercel.app
+        value: https://todo-app-frontend.onrender.com
       
-      # Email (user needs to configure)
+      # Email configuration
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
         value: 587
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
       - key: EMAIL_FROM
         value: noreply@yourdomain.com
-      
-      # OAuth (user needs to configure)
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: GITHUB_CLIENT_ID
-        sync: false
-      - key: GITHUB_CLIENT_SECRET
-        sync: false
       
       # Security
       - key: CSRF_SECRET
@@ -62,19 +48,12 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       
-      # Optional: Sentry
-      - key: SENTRY_DSN
-        sync: false
-      
-      # Optional: S3 for file uploads
-      - key: AWS_ACCESS_KEY_ID
-        sync: false
-      - key: AWS_SECRET_ACCESS_KEY
-        sync: false
-      - key: AWS_S3_BUCKET
-        sync: false
+      # AWS Region (if using S3)
       - key: AWS_REGION
         value: us-east-1
+      
+      # Pull secrets from environment group
+      - fromGroup: todo-app-secrets
 
     healthCheckPath: /api/v1/health
     autoDeploy: true
@@ -123,18 +102,40 @@ databases:
 envVarGroups:
   - name: todo-app-secrets
     envVars:
-      # Add your secrets here after deployment
+      # Email configuration (required for password reset)
       - key: SMTP_USER
         value: your-email@gmail.com
+        sync: false
       - key: SMTP_PASS
         value: your-app-password
+        sync: false
+      
+      # OAuth configuration (optional)
       - key: GOOGLE_CLIENT_ID
         value: your-google-client-id
+        sync: false
       - key: GOOGLE_CLIENT_SECRET
         value: your-google-client-secret
+        sync: false
       - key: GITHUB_CLIENT_ID
         value: your-github-client-id
+        sync: false
       - key: GITHUB_CLIENT_SECRET
         value: your-github-client-secret
+        sync: false
+      
+      # Monitoring (optional)
       - key: SENTRY_DSN
         value: your-sentry-dsn
+        sync: false
+      
+      # File storage (optional)
+      - key: AWS_ACCESS_KEY_ID
+        value: your-aws-key
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        value: your-aws-secret
+        sync: false
+      - key: AWS_S3_BUCKET
+        value: your-bucket-name
+        sync: false
