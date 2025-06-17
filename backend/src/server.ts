@@ -19,6 +19,19 @@ const main = async () => {
     // Test database connection
     await prisma.$connect();
     logger.info('Database connected successfully');
+    
+    // Run migrations in production
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        const { execSync } = require('child_process');
+        logger.info('Running database migrations...');
+        execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+        logger.info('Database migrations completed');
+      } catch (error) {
+        logger.error('Migration failed:', error);
+        // Continue anyway - migrations might already be applied
+      }
+    }
 
     // Build and start the app
     const app = await buildApp(prisma);

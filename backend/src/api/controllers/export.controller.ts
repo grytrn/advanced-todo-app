@@ -15,7 +15,6 @@ import {
   ExportTemplateResponse,
   ListExportTemplatesRequest,
   ListExportTemplatesResponse,
-  ExportError,
   ExportStatus,
   ExportFormat,
 } from '@shared/types/export';
@@ -33,9 +32,9 @@ export class ExportController {
    */
   async createExport(
     request: FastifyRequest<{ Body: CreateExportRequest }>,
-    reply: FastifyReply
+    __reply: FastifyReply
   ): Promise<CreateExportResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { format, options, sendEmail, emailRecipients } = request.body;
 
     try {
@@ -66,9 +65,9 @@ export class ExportController {
    */
   async getExportJob(
     request: FastifyRequest<{ Params: { jobId: string } }>,
-    reply: FastifyReply
+    __reply: FastifyReply
   ): Promise<GetExportJobResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { jobId } = request.params;
 
     try {
@@ -90,9 +89,9 @@ export class ExportController {
    */
   async listExportJobs(
     request: FastifyRequest<{ Querystring: ListExportJobsRequest }>,
-    reply: FastifyReply
+    __reply: FastifyReply
   ): Promise<ListExportJobsResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { page, limit, status, format } = request.query;
 
     try {
@@ -120,9 +119,9 @@ export class ExportController {
    */
   async downloadExport(
     request: FastifyRequest<{ Params: { jobId: string } }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<void> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { jobId } = request.params;
 
     try {
@@ -150,9 +149,9 @@ export class ExportController {
    */
   async getExportProgress(
     request: FastifyRequest<{ Params: { jobId: string } }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<void> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { jobId } = request.params;
 
     // Set SSE headers
@@ -205,9 +204,9 @@ export class ExportController {
    */
   async createExportSchedule(
     request: FastifyRequest<{ Body: CreateExportScheduleRequest }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<ExportScheduleResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
 
     try {
       const schedule = await this.exportService.createExportSchedule(
@@ -234,9 +233,9 @@ export class ExportController {
       Params: { scheduleId: string };
       Body: UpdateExportScheduleRequest;
     }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<ExportScheduleResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { scheduleId } = request.params;
 
     try {
@@ -262,9 +261,9 @@ export class ExportController {
    */
   async deleteExportSchedule(
     request: FastifyRequest<{ Params: { scheduleId: string } }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<{ success: true }> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { scheduleId } = request.params;
 
     try {
@@ -283,9 +282,9 @@ export class ExportController {
    */
   async listExportSchedules(
     request: FastifyRequest,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<ListExportSchedulesResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
 
     try {
       const schedules = await this.exportService.listExportSchedules(userId);
@@ -306,9 +305,9 @@ export class ExportController {
    */
   async createExportTemplate(
     request: FastifyRequest<{ Body: CreateExportTemplateRequest }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<ExportTemplateResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
 
     try {
       const template = await this.exportService.createExportTemplate(
@@ -335,9 +334,9 @@ export class ExportController {
       Params: { templateId: string };
       Body: UpdateExportTemplateRequest;
     }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<ExportTemplateResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { templateId } = request.params;
 
     try {
@@ -363,9 +362,9 @@ export class ExportController {
    */
   async deleteExportTemplate(
     request: FastifyRequest<{ Params: { templateId: string } }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<{ success: true }> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { templateId } = request.params;
 
     try {
@@ -384,9 +383,9 @@ export class ExportController {
    */
   async listExportTemplates(
     request: FastifyRequest<{ Querystring: ListExportTemplatesRequest }>,
-    reply: FastifyReply
+    _reply: FastifyReply
   ): Promise<ListExportTemplatesResponse> {
-    const userId = request.user!.id;
+    const userId = request.user!.id as string;
     const { format, includePublic = true } = request.query;
 
     try {

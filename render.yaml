@@ -4,7 +4,7 @@ services:
     name: todo-app-backend
     runtime: node
     plan: free
-    buildCommand: cd backend && npm install && npm run build && npm run migrate
+    buildCommand: cd backend && npm install && npm run generate && npm run build
     startCommand: cd backend && npm run start:prod
     envVars:
       # Database
