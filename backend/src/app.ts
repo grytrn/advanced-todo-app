@@ -3,6 +3,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyJwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
 import { PrismaClient } from '@prisma/client';
 import { config } from './config';
 import { logger } from './utils/logger';
@@ -16,7 +17,6 @@ declare module 'fastify' {
   interface FastifyRequest {
     userId?: string;
     startTime?: number;
-    user?: { id: string; email: string; name: string };
   }
 }
 
@@ -70,6 +70,11 @@ export const buildApp = async (prisma: PrismaClient): Promise<FastifyInstance> =
     sign: {
       expiresIn: config.auth.jwt.expiresIn,
     },
+  });
+
+  // Register cookie plugin
+  await app.register(fastifyCookie, {
+    secret: config.auth.jwt.secret, // for signed cookies
   });
 
   // Authentication decorator

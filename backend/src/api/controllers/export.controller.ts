@@ -1,4 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
+import type { AuthenticatedRequest } from '../../middleware/auth/authenticate';
 import { ExportService } from '../../services/export/export.service';
 import {
   CreateExportRequest,
@@ -34,7 +35,7 @@ export class ExportController {
     request: FastifyRequest<{ Body: CreateExportRequest }>,
     __reply: FastifyReply
   ): Promise<CreateExportResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { format, options, sendEmail, emailRecipients } = request.body;
 
     try {
@@ -67,7 +68,7 @@ export class ExportController {
     request: FastifyRequest<{ Params: { jobId: string } }>,
     __reply: FastifyReply
   ): Promise<GetExportJobResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { jobId } = request.params;
 
     try {
@@ -91,7 +92,7 @@ export class ExportController {
     request: FastifyRequest<{ Querystring: ListExportJobsRequest }>,
     __reply: FastifyReply
   ): Promise<ListExportJobsResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { page, limit, status, format } = request.query;
 
     try {
@@ -121,7 +122,7 @@ export class ExportController {
     request: FastifyRequest<{ Params: { jobId: string } }>,
     _reply: FastifyReply
   ): Promise<void> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { jobId } = request.params;
 
     try {
@@ -131,12 +132,12 @@ export class ExportController {
       );
 
       // Set headers
-      reply.header('Content-Type', mimeType);
-      reply.header('Content-Disposition', `attachment; filename="${filename}"`);
+      _reply.header('Content-Type', mimeType);
+      _reply.header('Content-Disposition', `attachment; filename="${filename}"`);
 
       // Stream file
       const stream = fs.createReadStream(path);
-      return reply.send(stream);
+      return _reply.send(stream);
     } catch (error) {
       logger.error({ error, userId, jobId }, 'Failed to download export');
       throw error;
@@ -151,11 +152,11 @@ export class ExportController {
     request: FastifyRequest<{ Params: { jobId: string } }>,
     _reply: FastifyReply
   ): Promise<void> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { jobId } = request.params;
 
     // Set SSE headers
-    reply.raw.writeHead(200, {
+    _reply.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
@@ -163,7 +164,7 @@ export class ExportController {
 
     // Send initial status
     const job = await this.exportService.getExportJob(userId, jobId);
-    reply.raw.write(`data: ${JSON.stringify({ 
+    _reply.raw.write(`data: ${JSON.stringify({ 
       status: job.status, 
       progress: job.progress || 0 
     })}\n\n`);
@@ -173,7 +174,7 @@ export class ExportController {
       try {
         const updatedJob = await this.exportService.getExportJob(userId, jobId);
         
-        reply.raw.write(`data: ${JSON.stringify({ 
+        _reply.raw.write(`data: ${JSON.stringify({ 
           status: updatedJob.status, 
           progress: updatedJob.progress || 0,
           fileUrl: updatedJob.fileUrl,
@@ -183,12 +184,12 @@ export class ExportController {
         // Stop polling if job is complete or failed
         if ([ExportStatus.COMPLETED, ExportStatus.FAILED, ExportStatus.EXPIRED].includes(updatedJob.status as ExportStatus)) {
           clearInterval(interval);
-          reply.raw.end();
+          _reply.raw.end();
         }
       } catch (error) {
         logger.error({ error, userId, jobId }, 'Error in progress stream');
         clearInterval(interval);
-        reply.raw.end();
+        _reply.raw.end();
       }
     }, 1000); // Poll every second
 
@@ -206,7 +207,7 @@ export class ExportController {
     request: FastifyRequest<{ Body: CreateExportScheduleRequest }>,
     _reply: FastifyReply
   ): Promise<ExportScheduleResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
 
     try {
       const schedule = await this.exportService.createExportSchedule(
@@ -235,7 +236,7 @@ export class ExportController {
     }>,
     _reply: FastifyReply
   ): Promise<ExportScheduleResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { scheduleId } = request.params;
 
     try {
@@ -263,7 +264,7 @@ export class ExportController {
     request: FastifyRequest<{ Params: { scheduleId: string } }>,
     _reply: FastifyReply
   ): Promise<{ success: true }> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { scheduleId } = request.params;
 
     try {
@@ -284,7 +285,7 @@ export class ExportController {
     request: FastifyRequest,
     _reply: FastifyReply
   ): Promise<ListExportSchedulesResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
 
     try {
       const schedules = await this.exportService.listExportSchedules(userId);
@@ -307,7 +308,7 @@ export class ExportController {
     request: FastifyRequest<{ Body: CreateExportTemplateRequest }>,
     _reply: FastifyReply
   ): Promise<ExportTemplateResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
 
     try {
       const template = await this.exportService.createExportTemplate(
@@ -336,7 +337,7 @@ export class ExportController {
     }>,
     _reply: FastifyReply
   ): Promise<ExportTemplateResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { templateId } = request.params;
 
     try {
@@ -364,7 +365,7 @@ export class ExportController {
     request: FastifyRequest<{ Params: { templateId: string } }>,
     _reply: FastifyReply
   ): Promise<{ success: true }> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { templateId } = request.params;
 
     try {
@@ -385,7 +386,7 @@ export class ExportController {
     request: FastifyRequest<{ Querystring: ListExportTemplatesRequest }>,
     _reply: FastifyReply
   ): Promise<ListExportTemplatesResponse> {
-    const userId = request.user!.id as string;
+    const userId = (request as AuthenticatedRequest).userId;
     const { format, includePublic = true } = request.query;
 
     try {

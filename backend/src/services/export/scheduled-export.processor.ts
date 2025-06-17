@@ -4,6 +4,7 @@ import { ExportService } from './export.service';
 import { createLogger } from '../../utils/logger';
 import { ExportFrequency, ExportStatus } from '@shared/types/export';
 import { TodoStatus } from '@shared/types/todo';
+import { env } from '../../config/env';
 
 const logger = createLogger('scheduled-export-processor');
 
@@ -176,7 +177,7 @@ export class ScheduledExportProcessor {
             scheduleName: schedule.name,
             format: schedule.format,
             fileName: job.fileName!,
-            downloadUrl: `${process.env.APP_URL}/api/v1/exports/${jobId}/download`,
+            downloadUrl: `${env.APP_URL}/api/v1/exports/${jobId}/download`,
             summary,
             subject: schedule.emailDelivery.subject,
             message: schedule.emailDelivery.message,

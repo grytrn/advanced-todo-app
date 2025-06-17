@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { CategoryService } from '../../services/category.service';
-import { prisma } from '../../index';
+// Prisma will be accessed via app.prisma
 import {
   createCategorySchema,
   updateCategorySchema,
@@ -18,7 +18,7 @@ import type {
 } from '@shared/types/category';
 
 const categoryRoutes: FastifyPluginAsync = async (app) => {
-  const categoryService = new CategoryService(prisma);
+  const categoryService = new CategoryService(app.prisma);
 
   // All routes require authentication
   app.addHook('onRequest', app.authenticate);

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { AdvancedAuthService } from '../../services/auth/advanced-auth.service';
 import { OAuthService } from '../../services/auth/oauth.service';
 import { SessionService } from '../../services/auth/session.service';
-import { prisma } from '../../index';
+import { env } from '../../config/env';
 import { 
   authenticate, 
   requireVerifiedEmail,
@@ -55,24 +55,24 @@ const createApiKeySchema = z.object({
 });
 
 const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
-  const authService = new AdvancedAuthService(prisma, app);
-  const oauthService = new OAuthService(prisma, app);
-  const sessionService = new SessionService(prisma);
+  const authService = new AdvancedAuthService(app.prisma, app);
+  const oauthService = new OAuthService(app.prisma, app);
+  const sessionService = new SessionService(app.prisma);
 
   // Configure OAuth providers
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     oauthService.configureProvider('google', {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      redirectUri: `${process.env.FRONTEND_URL}/auth/google/callback`,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+      redirectUri: `${env.FRONTEND_URL}/auth/google/callback`,
     });
   }
 
-  if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+  if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
     oauthService.configureProvider('github', {
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      redirectUri: `${process.env.FRONTEND_URL}/auth/github/callback`,
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+      redirectUri: `${env.FRONTEND_URL}/auth/github/callback`,
     });
   }
 
@@ -126,8 +126,9 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
       body: loginSchema,
     },
   }, async (request, reply) => {
+    const body = request.body as z.infer<typeof loginSchema>;
     const result = await authService.login(
-      request.body,
+      body,
       request.ip,
       request.headers['user-agent'] as string
     );
@@ -136,7 +137,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     const csrfToken = generateCSRFToken();
     reply.setCookie('csrf-token', csrfToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
     });
@@ -156,9 +157,10 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
       body: verify2FASchema,
     },
   }, async (request, reply) => {
+    const body = request.body as z.infer<typeof verify2FASchema>;
     const result = await authService.verify2FA(
-      request.body.email,
-      request.body.code,
+      body.email,
+      body.code,
       request.ip,
       request.headers['user-agent'] as string
     );
@@ -167,7 +169,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     const csrfToken = generateCSRFToken();
     reply.setCookie('csrf-token', csrfToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
     });
@@ -189,7 +191,8 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
       }),
     },
   }, async (request, reply) => {
-    const result = await authService.requestPasswordReset(request.body.email);
+    const body = request.body as { email: string };
+    const result = await authService.requestPasswordReset(body.email);
     return reply.send({
       success: true,
       data: result,
@@ -202,9 +205,10 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
       body: resetPasswordSchema,
     },
   }, async (request, reply) => {
+    const body = request.body as z.infer<typeof resetPasswordSchema>;
     const result = await authService.resetPassword(
-      request.body.token,
-      request.body.password
+      body.token,
+      body.password
     );
     return reply.send({
       success: true,
@@ -226,7 +230,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     // Store state in session or cookie for verification
     reply.setCookie('oauth-state', state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 600, // 10 minutes
@@ -266,7 +270,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     const csrfToken = generateCSRFToken();
     reply.setCookie('csrf-token', csrfToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
     });
@@ -288,7 +292,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
   }, async (request, reply) => {
     const authRequest = request as AuthenticatedRequest;
     
-    const user = await prisma.user.findUnique({
+    const user = await app.prisma.user.findUnique({
       where: { id: authRequest.userId },
       select: {
         id: true,
@@ -348,9 +352,10 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     },
   }, async (request, reply) => {
     const authRequest = request as AuthenticatedRequest;
+    const body = request.body as z.infer<typeof enable2FASchema>;
     const result = await authService.confirm2FA(
       authRequest.userId,
-      request.body.code
+      body.code
     );
     
     return reply.send({
@@ -367,9 +372,10 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     },
   }, async (request, reply) => {
     const authRequest = request as AuthenticatedRequest;
+    const body = request.body as z.infer<typeof disable2FASchema>;
     const result = await authService.disable2FA(
       authRequest.userId,
-      request.body.password
+      body.password
     );
     
     return reply.send({
@@ -386,9 +392,10 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     },
   }, async (request, reply) => {
     const authRequest = request as AuthenticatedRequest;
+    const body = request.body as z.infer<typeof disable2FASchema>;
     const result = await authService.regenerateBackupCodes(
       authRequest.userId,
-      request.body.password
+      body.password
     );
     
     return reply.send({
@@ -409,7 +416,8 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     },
   }, async (request, reply) => {
     const authRequest = request as AuthenticatedRequest;
-    const { name, scopes, expiresAt } = request.body;
+    const body = request.body as z.infer<typeof createApiKeySchema>;
+    const { name, scopes, expiresAt } = body;
     
     const result = await authService.createApiKey(
       authRequest.userId,
@@ -430,7 +438,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
   }, async (request, reply) => {
     const authRequest = request as AuthenticatedRequest;
     
-    const apiKeys = await prisma.apiKey.findMany({
+    const apiKeys = await app.prisma.apiKey.findMany({
       where: { userId: authRequest.userId },
       select: {
         id: true,
@@ -464,7 +472,7 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     const authRequest = request as AuthenticatedRequest;
     const { keyId } = request.params as { keyId: string };
     
-    await prisma.apiKey.deleteMany({
+    await app.prisma.apiKey.deleteMany({
       where: {
         id: keyId,
         userId: authRequest.userId,
@@ -571,13 +579,13 @@ const advancedAuthRoutes: FastifyPluginAsync = async (app) => {
     }
     
     const [logs, total] = await Promise.all([
-      prisma.auditLog.findMany({
+      app.prisma.auditLog.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.auditLog.count({ where }),
+      app.prisma.auditLog.count({ where }),
     ]);
     
     return reply.send({

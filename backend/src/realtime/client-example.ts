@@ -11,8 +11,8 @@ import type {
 } from './types';
 
 // Configuration
-const SERVER_URL = process.env.SERVER_URL || 'http://localhost:8000';
-const AUTH_TOKEN = process.env.AUTH_TOKEN || 'your-jwt-token-here';
+const SERVER_URL = process.env['SERVER_URL'] || 'http://localhost:8000';
+const AUTH_TOKEN = process.env['AUTH_TOKEN'] || 'your-jwt-token-here';
 
 // Create typed socket
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(SERVER_URL, {
@@ -102,7 +102,7 @@ socket.on('notification', (notification) => {
 });
 
 // Activity feed
-socket.on('activity:feed', (activity) => {
+socket.on('activity:feed', (activity: any) => {
   console.log('📊 Activity:', {
     action: activity.action,
     entity: `${activity.entityType}:${activity.entityTitle}`,
@@ -212,7 +212,7 @@ function showMenu() {
       case '5':
         console.log('Select status: 1=online, 2=away, 3=busy, 4=offline');
         rl.question('Status: ', (status) => {
-          const statusMap = {
+          const statusMap: Record<string, string> = {
             '1': 'online',
             '2': 'away',
             '3': 'busy',

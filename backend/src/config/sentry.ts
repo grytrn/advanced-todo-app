@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { ProfilingIntegration } from '@sentry/profiling-node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
 
 export function initSentry(): void {
   if (process.env.SENTRY_DSN) {
@@ -8,10 +8,9 @@ export function initSentry(): void {
       environment: process.env.NODE_ENV || 'development',
       integrations: [
         // Automatic instrumentation
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.Express({ app: true }),
+        Sentry.httpIntegration({ tracing: true }),
         // Performance profiling
-        new ProfilingIntegration(),
+        nodeProfilingIntegration(),
       ],
       // Performance Monitoring
       tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
@@ -53,22 +52,15 @@ export function initSentry(): void {
 }
 
 // Error handler middleware
-export const sentryErrorHandler = Sentry.Handlers.errorHandler({
-  shouldHandleError(error) {
-    // Capture all errors in production
-    if (process.env.NODE_ENV === 'production') {
-      return true;
-    }
-    // In development, only capture 5xx errors
-    return error.status >= 500;
-  },
-});
+export const sentryErrorHandler = (error: any, request: any, reply: any) => {
+  // Capture all errors in production
+  if (env.NODE_ENV === 'production' || error.status >= 500) {
+    Sentry.captureException(error);
+  }
+};
 
-// Request handler middleware
-export const sentryRequestHandler = Sentry.Handlers.requestHandler({
-  user: ['id', 'email'],
-  ip: false, // Don't capture IP addresses for privacy
-});
+// Request handler middleware - not needed in Fastify
+export const sentryRequestHandler = null;
 
-// Tracing middleware
-export const sentryTracingHandler = Sentry.Handlers.tracingHandler();
+// Tracing middleware - not needed in Fastify
+export const sentryTracingHandler = null;

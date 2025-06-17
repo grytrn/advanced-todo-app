@@ -1,9 +1,9 @@
 import { FastifyPluginAsync } from 'fastify';
 import { TagService } from '../../services/tag.service';
-import { prisma } from '../../index';
+// Prisma will be accessed via app.prisma
 
 const tagRoutes: FastifyPluginAsync = async (app) => {
-  const tagService = new TagService(prisma);
+  const tagService = new TagService(app.prisma);
 
   // All routes require authentication
   app.addHook('onRequest', app.authenticate);

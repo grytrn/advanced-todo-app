@@ -1,0 +1,37 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Pre-push hook to prevent broken builds from being pushed
+echo "🔨 Running pre-push build checks..."
+
+# Function to handle build failures
+handle_build_failure() {
+    echo "❌ $1 build failed!"
+    echo "🚫 Push rejected - please fix the build errors before pushing."
+    exit 1
+}
+
+# Check if we're in the root directory
+if [ ! -f "package.json" ]; then
+    echo "⚠️  Not in project root directory"
+    exit 1
+fi
+
+# Build frontend
+echo "📦 Building frontend..."
+cd frontend
+if ! npm run build; then
+    handle_build_failure "Frontend"
+fi
+cd ..
+
+# Build backend
+echo "📦 Building backend..."
+cd backend
+if ! npm run build; then
+    handle_build_failure "Backend"
+fi
+cd ..
+
+echo "✅ All builds successful! Proceeding with push..."
+exit 0

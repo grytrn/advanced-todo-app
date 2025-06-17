@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { TodoService } from '../../services/todo.service';
-import { prisma } from '../../index';
+// Prisma will be accessed via app.prisma
 import {
   createTodoSchema,
   updateTodoSchema,
@@ -25,7 +25,7 @@ import type {
 } from '@shared/types/todo';
 
 const todoRoutes: FastifyPluginAsync = async (app) => {
-  const todoService = new TodoService(prisma);
+  const todoService = new TodoService(app.prisma);
 
   // All routes require authentication
   app.addHook('onRequest', app.authenticate);

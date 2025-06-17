@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ExportController } from '../controllers/export.controller';
 import { ExportService } from '../../services/export/export.service';
-import { prisma } from '../../index';
+// Prisma will be accessed via app.prisma
 import {
   createExportSchema,
   getExportJobSchema,
@@ -18,7 +18,7 @@ import {
 } from '../schemas/export.schema';
 
 const exportRoutes: FastifyPluginAsync = async (fastify) => {
-  const exportService = new ExportService(prisma);
+  const exportService = new ExportService(fastify.prisma);
   const exportController = new ExportController(exportService);
 
   // All routes require authentication

@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { AuthService } from '../../services/auth.service';
-import { prisma } from '../../index';
+// Prisma will be accessed via app.prisma
 import {
   registerSchema,
   loginSchema,
@@ -21,7 +21,7 @@ import type {
 } from '@shared/types/auth';
 
 const authRoutes: FastifyPluginAsync = async (app) => {
-  const authService = new AuthService(prisma, app);
+  const authService = new AuthService(app.prisma, app);
 
   // Register endpoint
   app.post<{

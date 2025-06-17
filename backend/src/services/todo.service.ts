@@ -1,14 +1,13 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { createLogger } from '../utils/logger';
-import { NotFoundError, ForbiddenError, ValidationError } from '../utils/errors';
+import { NotFoundError, ValidationError } from '../utils/errors';
 import type {
   Todo,
   CreateTodoRequest,
   UpdateTodoRequest,
   TodoListRequest,
-  Priority,
-  TodoStatus,
 } from '@shared/types/todo';
+import { Priority, TodoStatus } from '@shared/types/todo';
 
 const logger = createLogger('todo-service');
 

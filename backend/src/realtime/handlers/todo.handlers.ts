@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { PrismaClient } from '@prisma/client';
 import { createLogger } from '../../utils/logger';
 import { TodoService } from '../../services/todo.service';
+import { Priority } from '@shared/types/todo';
 import type { 
   ClientToServerEvents, 
   ServerToClientEvents, 
@@ -48,11 +49,11 @@ export class TodoEventHandlers {
       const todo = await this.todoService.create(userId, {
         title: data.title,
         description: data.content,
-        priority: data.priority || 'medium',
+        priority: (data.priority?.toUpperCase() as Priority) || Priority.MEDIUM,
         categoryId: data.categoryId,
         tagNames: data.tagIds, // Assuming tagIds are actually tag names
-        dueDate: data.dueDate,
-        reminder: data.reminder ? new Date(data.reminder) : undefined,
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined,
+        reminder: data.reminder ? new Date(data.reminder).toISOString() : undefined,
       });
       
       // Emit to all user's connected devices

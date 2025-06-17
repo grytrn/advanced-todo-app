@@ -7,8 +7,6 @@ import { createWriteStream } from 'fs';
 import { createLogger } from '../../utils/logger';
 import { NotFoundError, ValidationError } from '../../utils/errors';
 import type {
-  ExportFormat,
-  ExportStatus,
   ExportOptions,
   ExportJob,
   CreateExportRequest,
@@ -19,6 +17,7 @@ import type {
   CreateExportTemplateRequest,
   UpdateExportTemplateRequest,
 } from '@shared/types/export';
+import { ExportFormat, ExportStatus } from '@shared/types/export';
 import type { TodoListRequest } from '@shared/types/todo';
 import { TodoService } from '../todo.service';
 import { PdfExportGenerator } from './generators/pdf.generator';
