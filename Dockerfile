@@ -12,8 +12,9 @@ COPY backend/package*.json ./backend/
 COPY frontend/package*.json ./frontend/
 COPY shared ./shared
 
-# Install all dependencies
-RUN npm ci --only=production
+# Install all dependencies (skip husky in production)
+ENV HUSKY=0
+RUN npm ci --omit=dev || npm ci --only=production
 RUN cd backend && npm ci
 
 # Copy backend source
